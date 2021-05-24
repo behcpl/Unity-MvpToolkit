@@ -1,0 +1,18 @@
+{
+    "name": "com.behc.mvptoolkit",
+    "version": "0.5.0",
+    "displayName": "MvpToolkit",
+    "description": "Lean architecture for rapid UI/Game setup",
+    "unity": "2019.4",
+    "dependencies": {},
+    "keywords": [
+        "architecture",
+        "ugui",
+        "mvp"
+    ],
+    "author": {
+        "name": "BEHC Bartosz Czuba",
+        "email": "bartosz.czuba@behc.pl",
+        "url": "https://github.com/behcpl/Unity-MvpToolkit"
+    }
+}

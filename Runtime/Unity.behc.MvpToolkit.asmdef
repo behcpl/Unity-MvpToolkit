@@ -1,0 +1,22 @@
+{
+    "name": "behc.MvpToolkit",
+    "rootNamespace": "",
+    "references": [
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.inputsystem",
+            "expression": "",
+            "define": "BEHC_MVPTOOLKIT_INPUTSYSTEM"
+        }
+    ],
+    "noEngineReferences": false
+}
