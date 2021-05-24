@@ -41,6 +41,12 @@ namespace Behc.Mvp.ToolTipManager
             if (!_contentChanged || _toolTipModel == _model.CurrentToolTip)
                 return;
 
+#if BEHC_MVPTOOLKIT_INPUTSYSTEM
+            Vector2 mousePos = Mouse.current.position.ReadValue();
+#else
+            Vector2 mousePos = Input.mousePosition;
+#endif  
+
             if (_toolTipPresenter != null)
             {
                 BindingHelper.Unbind(_toolTipModel, _toolTipPresenter);
@@ -55,7 +61,7 @@ namespace Behc.Mvp.ToolTipManager
                 BindingHelper.Bind(_toolTipModel, _toolTipPresenter, this, false);
 
                 LayoutRebuilder.ForceRebuildLayoutImmediate(_toolTipPresenter.RectTransform);
-                UpdateToolTipTransform(_toolTipPresenter.RectTransform, Mouse.current.position.ReadValue());
+                UpdateToolTipTransform(_toolTipPresenter.RectTransform, mousePos);
             }
         }
 
@@ -64,12 +70,13 @@ namespace Behc.Mvp.ToolTipManager
             if (_model == null)
                 return;
 
-            PointerEventData pointerData = new PointerEventData(_eventSystem);
 #if BEHC_MVPTOOLKIT_INPUTSYSTEM
-            pointerData.position = Mouse.current.position.ReadValue();
+            Vector2 mousePos = Mouse.current.position.ReadValue();
 #else
-            pointerData.position = Input.mousePosition;
-#endif
+            Vector2 mousePos = Input.mousePosition;
+#endif            
+            PointerEventData pointerData = new PointerEventData(_eventSystem);
+            pointerData.position = mousePos;
 
             List<RaycastResult> results = new List<RaycastResult>();
             _eventSystem.RaycastAll(pointerData, results);
@@ -107,7 +114,7 @@ namespace Behc.Mvp.ToolTipManager
             }
 
             if (_toolTipPresenter != null)
-                UpdateToolTipTransform(_toolTipPresenter.RectTransform, Mouse.current.position.ReadValue());
+                UpdateToolTipTransform(_toolTipPresenter.RectTransform, mousePos);
         }
 
         private void UpdateToolTipTransform(RectTransform tm, Vector2 pointerPos)
