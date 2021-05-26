@@ -12,3 +12,4 @@
 * ToastManager should store list in presenter (don't accumulate in model if no presenter is bound)
 * Add animation support for ToolTipManager
 * Add some form of blocking (i.e. some new window should deactivate all layers below)
+* Rename GridLayout (conflicts with uGUI component)

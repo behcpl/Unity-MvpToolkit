@@ -77,9 +77,8 @@ namespace Behc.MiniTween
         }
 
         private readonly List<Tween> _activeTweens = new List<Tween>(_INIT_SIZE);
+        private readonly List<Tween> _newTweens = new List<Tween>(_INIT_SIZE);
         private readonly List<Tween> _unusedPool = new List<Tween>(_INIT_SIZE);
-
-        private bool _updateLoop;
 
         public void Initialize(MiniTweenProvider options)
         {
@@ -93,9 +92,6 @@ namespace Behc.MiniTween
 
         public ITween Animate(object owner, Action<object, Vector4> setter, Vector4 from, Vector4 to, float duration)
         {
-            if (_updateLoop)
-                throw new Exception("Cannot add tween from inside update loop!");
-            
             Tween tween = Allocate();
             tween.ValueFrom = from;
             tween.ValueTo = to;
@@ -106,7 +102,7 @@ namespace Behc.MiniTween
             tween.Owner = owner;
             tween.Setter = setter;
 
-            _activeTweens.Add(tween);
+            _newTweens.Add(tween);
 
             return tween;
         }
@@ -114,8 +110,16 @@ namespace Behc.MiniTween
         private void Update()
         {
             float dt = _options.UnscaledTime ? Time.unscaledDeltaTime : Time.smoothDeltaTime;
+
+            foreach (Tween newTween in _newTweens)
+            {
+                if(newTween.Completed)
+                    Deallocate(newTween);
+                else
+                    _activeTweens.Add(newTween);
+            }
+            _newTweens.Clear();
             
-            _updateLoop = true;
             foreach (Tween tween in _activeTweens)
             {
                 if (tween.Completed)
@@ -140,8 +144,6 @@ namespace Behc.MiniTween
                     tween.OnUpdate?.Invoke();
                 }
             }
-
-            _updateLoop = false;
 
             _activeTweens.RemoveAll(t => t.Completed);
         }
