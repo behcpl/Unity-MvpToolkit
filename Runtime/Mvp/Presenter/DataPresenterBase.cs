@@ -36,7 +36,9 @@ namespace Behc.Mvp.Presenter
 
         public virtual void Initialize(PresenterMap presenterMap, PresenterUpdateKernel kernel)
         {
-            Debug.Log($"({name}) <color=#ff00ff>Initialize</color> <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#ff00ff>Initialize</color> <<{PresenterUpdateKernel.Counter}>>");
+#endif
 
             _presenterMap = new PresenterMap(presenterMap);
             _updateKernel = kernel;
@@ -44,7 +46,9 @@ namespace Behc.Mvp.Presenter
 
         public virtual void Destroy()
         {
-            Debug.Log($"({name}) <color=#800080>Destroy</color> <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#800080>Destroy</color> <<{PresenterUpdateKernel.Counter}>>");
+#endif
         }
 
         public virtual void Bind(object model, IPresenter parent, bool prepareForAnimation)
@@ -52,7 +56,9 @@ namespace Behc.Mvp.Presenter
             Debug.Assert(_model == null, "Already bound!");
             Debug.Assert(_updateKernel.UpdateLoop, "Not in kernel update loop");
 
-            Debug.Log($"({name}) <color=#FF0000>Bind</color> prepare:{prepareForAnimation} <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#FF0000>Bind</color> prepare:{prepareForAnimation} <<{PresenterUpdateKernel.Counter}>>");
+#endif
 
             gameObject.SetActive(true);
 
@@ -67,7 +73,9 @@ namespace Behc.Mvp.Presenter
             Debug.Assert(_model != null, "Not bound!");
             Debug.Assert(_updateKernel.UpdateLoop, "Not in kernel update loop");
 
-            Debug.Log($"({name}) <color=#CC0000>Rebind</color> <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#CC0000>Rebind</color> <<{PresenterUpdateKernel.Counter}>>");
+#endif
 
             if (!ReferenceEquals(_model, model))
             {
@@ -88,7 +96,9 @@ namespace Behc.Mvp.Presenter
             Debug.Assert(_model != null, "Not bound!");
             Debug.Assert(_updateKernel.UpdateLoop, "Not in kernel update loop");
 
-            Debug.Log($"({name}) <color=#800000>Unbind</color> <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#800000>Unbind</color> <<{PresenterUpdateKernel.Counter}>>");
+#endif
            
             if (IsAnimating)
                 AbortAnimations();
@@ -117,7 +127,9 @@ namespace Behc.Mvp.Presenter
 
         public virtual void Activate()
         {
-            Debug.Log($"({name}) <color=#00ff00>Activate</color> <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#00ff00>Activate</color> <<{PresenterUpdateKernel.Counter}>>");
+#endif
 
             Debug.Assert(!IsActive, "Already activated!");
             IsActive = true;
@@ -125,7 +137,9 @@ namespace Behc.Mvp.Presenter
 
         public virtual void Deactivate()
         {
-            Debug.Log($"({name}) <color=#008000>Deactivate</color> <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#008000>Deactivate</color> <<{PresenterUpdateKernel.Counter}>>");
+#endif
 
             Debug.Assert(IsActive, "Not activated!");
             IsActive = false;

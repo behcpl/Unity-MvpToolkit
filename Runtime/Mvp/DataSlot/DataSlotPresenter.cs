@@ -31,7 +31,9 @@ namespace Behc.Mvp.DataSlot
             Debug.Assert(_model != null, "Not bound!");
             // Debug.Assert(_updateKernel.UpdateLoop, "Not in kernel update loop");
 
-            Debug.Log($"({name}) Rebind() <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) Rebind() <<{PresenterUpdateKernel.Counter}>>");
+#endif
 
             if (!ReferenceEquals(_model, model))
             {

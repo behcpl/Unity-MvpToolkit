@@ -8,6 +8,10 @@ namespace Behc.Mvp.Presenter
     {
         public bool UpdateLoop { get; private set; }
 
+#if BEHC_MVPTOOLKIT_VERBOSE
+        public static int Counter = 0;
+#endif
+
         private class PresenterItem
         {
             public IPresenter Presenter;
@@ -94,6 +98,10 @@ namespace Behc.Mvp.Presenter
             }
 
             UpdateLoop = false;
+
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Counter++;
+#endif
         }
 
         private void UpdateItem(PresenterItem item)
@@ -112,10 +120,5 @@ namespace Behc.Mvp.Presenter
             item.RequestedUpdate = false;
             item.ChildRequestedUpdate = false;
         }
-    }
-    
-    public static class TestCounter
-    {
-        public static int Counter = 0;
     }
 }

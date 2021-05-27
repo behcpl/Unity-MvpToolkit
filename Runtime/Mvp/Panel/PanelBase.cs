@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Behc.Mvp.Panel
 {
@@ -40,7 +41,9 @@ namespace Behc.Mvp.Panel
 
         public virtual void Initialize(PresenterMap presenterMap, PresenterUpdateKernel kernel)
         {
-            Debug.Log($"({name}) <color=#ff00ff>Initialize</color> <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#ff00ff>Initialize</color> <<{PresenterUpdateKernel.Counter}>>");
+#endif
 
             _updateKernel = kernel;
             _presenterMap = presenterMap;
@@ -50,7 +53,9 @@ namespace Behc.Mvp.Panel
 
         public virtual void Destroy()
         {
-            Debug.Log($"({name}) <color=#800080>Destroy</color> <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#800080>Destroy</color> <<{PresenterUpdateKernel.Counter}>>");
+#endif
 
             _presenters.ForEach(pf => pf.Presenter.Destroy());
 
@@ -63,7 +68,9 @@ namespace Behc.Mvp.Panel
             Debug.Assert(_model == null, "Already bound!");
             Debug.Assert(_updateKernel.UpdateLoop, "Not in kernel update loop");
 
-            Debug.Log($"({name}) <color=#FF0000>Bind</color> prepare:{prepareForAnimation} <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#FF0000>Bind</color> prepare:{prepareForAnimation} <<{PresenterUpdateKernel.Counter}>>");
+#endif
     
             gameObject.SetActive(true);
             Debug.Assert(gameObject.activeInHierarchy, "Not active in hierarchy!");
@@ -81,7 +88,9 @@ namespace Behc.Mvp.Panel
             Debug.Assert(_model != null, "Not bound!");
             Debug.Assert(_updateKernel.UpdateLoop, "Not in kernel update loop");
             
-            Debug.Log($"({name}) <color=#CC0000>Rebind</color> <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#CC0000>Rebind</color> <<{PresenterUpdateKernel.Counter}>>");
+#endif
 
             if (_model != model)
             {
@@ -107,7 +116,9 @@ namespace Behc.Mvp.Panel
             Debug.Assert(_model != null, "Not bound!");
             Debug.Assert(_updateKernel.UpdateLoop, "Not in kernel update loop");
 
-            Debug.Log($"({name}) <color=#800000>Unbind</color> <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#800000>Unbind</color> <<{PresenterUpdateKernel.Counter}>>");
+#endif
           
             gameObject.SetActive(false); //TODO: this is optimization, check if some operations requires object to be still active
 
@@ -164,13 +175,17 @@ namespace Behc.Mvp.Panel
             OnAbortAnimations();
 
             _presenters.ForEach(pf => pf.Presenter.AbortAnimations());
+            
+            Assert.IsFalse(IsAnimating, "Presenter is still animating, check OnAbortAnimations()");
         }
 
         public virtual void Activate()
         {
             Debug.Assert(!_active, "Already activated!");
 
-            Debug.Log($"({name}) <color=#00ff00>Activate</color> <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#00ff00>Activate</color> <<{PresenterUpdateKernel.Counter}>>");
+#endif
             _active = true;
 
             OnActivate();
@@ -182,7 +197,9 @@ namespace Behc.Mvp.Panel
         {
             Debug.Assert(_active, "Not activated!");
 
-            Debug.Log($"({name}) <color=#008000>Deactivate</color> <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) <color=#008000>Deactivate</color> <<{PresenterUpdateKernel.Counter}>>");
+#endif
             _active = false;
 
             OnDeactivate();
@@ -192,7 +209,9 @@ namespace Behc.Mvp.Panel
 
         public virtual void ScheduledUpdate()
         {
-            Debug.Log($"({name}) ScheduledUpdate <<{TestCounter.Counter}>>");
+#if BEHC_MVPTOOLKIT_VERBOSE
+            Debug.Log($"({name}) ScheduledUpdate <<{PresenterUpdateKernel.Counter}>>");
+#endif
         }
 
         protected void DisposeOnUnbind(IDisposable disposable)
