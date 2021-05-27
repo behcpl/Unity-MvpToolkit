@@ -63,6 +63,7 @@ namespace Behc.Mvp.Presenter
             GameObject instance = Object.Instantiate(_prefab, container, false);
             IPresenter presenter = instance.GetComponent<IPresenter>();
             presenter.Initialize(_presenterMap, _updateKernel);
+            instance.SetActive(false);
 
             return presenter;
         }

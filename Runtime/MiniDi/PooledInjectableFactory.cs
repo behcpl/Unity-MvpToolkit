@@ -64,6 +64,7 @@ namespace Behc.MiniDi
             IPresenter presenter = instance.GetComponent<IPresenter>();
             presenter.Initialize(_presenterMap, _updateKernel);
             Inject(presenter);
+            instance.SetActive(false);
             return presenter;
         }
     }

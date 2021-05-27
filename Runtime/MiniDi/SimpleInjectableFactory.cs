@@ -23,6 +23,7 @@ namespace Behc.MiniDi
             
             Inject(presenter);
             presenter.Initialize(_presenterMap, _updateKernel);
+            instance.SetActive(false);
 
             return presenter;
         }

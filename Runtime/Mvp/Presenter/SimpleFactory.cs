@@ -24,6 +24,7 @@ namespace Behc.Mvp.Presenter
             IPresenter presenter = instance.GetComponent<IPresenter>();
 
             presenter.Initialize(_presenterMap, _updateKernel);
+            instance.SetActive(false);
 
             return presenter;
         }
