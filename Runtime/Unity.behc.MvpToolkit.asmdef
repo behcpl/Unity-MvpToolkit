@@ -16,6 +16,11 @@
             "name": "com.unity.inputsystem",
             "expression": "",
             "define": "BEHC_MVPTOOLKIT_INPUTSYSTEM"
+        },
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "1.0.0",
+            "define": "BEHC_MVPTOOLKIT_TEXTMESHPRO"
         }
     ],
     "noEngineReferences": false
