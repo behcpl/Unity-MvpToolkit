@@ -19,11 +19,11 @@
     {
       "displayName": "Data Presenters Gallery",
       "description": "Showcase of all data presenters (like slot or collection) with multiple animation options. Requires TextMesh Pro essentials.",
-      "path": "Samples~/DataPresenters"
+      "path": "Samples~/DataPresentersGallery"
     }, {
-      "displayName": "Simple Game Navigation",
-      "description": "Very basic game UI setup, with multiple scenes. Requires TextMesh Pro essentials.",
-      "path": "Samples~/SimpleNavigation"
+      "displayName": "Simple Game",
+      "description": "Very basic game UI setup, with navigation between multiple scenes. Requires TextMesh Pro essentials.",
+      "path": "Samples~/SimpleGame"
     }
   ]
 }
