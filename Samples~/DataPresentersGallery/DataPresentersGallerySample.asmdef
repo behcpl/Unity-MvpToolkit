@@ -1,0 +1,22 @@
+{
+    "name": "DataPresentersGallerySample",
+    "rootNamespace": "",
+    "references": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "1.0.0",
+            "define": "SAMPLE_TEXTMESHPRO_PRESENT"
+        }
+    ],
+    "noEngineReferences": false
+}
