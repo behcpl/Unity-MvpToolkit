@@ -55,6 +55,7 @@ namespace Behc.Mvp.Components
             _mainCanvas.sortingOrder = order - 1;
 
             _tween = _mainGroup.AnimateAlpha(_tweenProvider.GetTweenSystem(), _alpha, _fadeDuration);
+            _tween.SetCompleteCallback(() => _tween = null);
         }
 
         public override void Switch(int newOrder, int previousOrder)
