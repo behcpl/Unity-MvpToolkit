@@ -135,7 +135,8 @@ namespace Behc.Mvp.PopupMenuManager
 
 #if BEHC_MVPTOOLKIT_INPUTSYSTEM
             Vector2 mousePos = Mouse.current.position.ReadValue();
-            //TODO: check for RMB
+            bool rmbDown = Mouse.current.rightButton.wasPressedThisFrame;
+            bool rmbUp = Mouse.current.rightButton.wasReleasedThisFrame;
 #else
             Vector2 mousePos = Input.mousePosition;
             bool rmbDown = Input.GetMouseButtonDown(1);
