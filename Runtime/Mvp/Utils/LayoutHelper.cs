@@ -1,10 +1,17 @@
-﻿using Behc.Mvp.PopupMenuManager;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Behc.Mvp.Utils
 {
     public static class LayoutHelper
-    {
+    {  
+        public enum Alignment
+        {
+            RIGHT,
+            LEFT,
+            TOP,
+            BOTTOM,
+        }
+        
         public static void KeepInsideParentRect(RectTransform parentTm, RectTransform tm, Vector2 desiredPosition)
         {
             Rect parentRect = parentTm.rect;
@@ -27,7 +34,7 @@ namespace Behc.Mvp.Utils
             tm.anchoredPosition = desiredPosition + adjust + off;
         }
 
-        public static void AdjacentRect(RectTransform parentTm, RectTransform tm, Rect ownerRect, Vector2 separation, PopupMenuManagerPresenter.Alignment alignment)
+        public static void AdjacentRect(RectTransform parentTm, RectTransform tm, Rect ownerRect, Vector2 separation, Alignment alignment)
         {
             //TODO: should direction be configurable? for now every layout (but TOP) tries to go down first
 
@@ -35,9 +42,9 @@ namespace Behc.Mvp.Utils
             Rect tmRect = tm.rect;
             Vector2 tmPivot = tm.pivot;
 
-            if (alignment == PopupMenuManagerPresenter.Alignment.TOP || alignment == PopupMenuManagerPresenter.Alignment.BOTTOM)
+            if (alignment == Alignment.TOP || alignment == Alignment.BOTTOM)
             {
-                if (alignment == PopupMenuManagerPresenter.Alignment.TOP)
+                if (alignment == Alignment.TOP)
                 {
                     tmRect.position = new Vector2(ownerRect.xMin + separation.x, ownerRect.yMax + separation.y) - Vector2.Scale(tmPivot, tmRect.size);
                     if (tmRect.yMax > parentRect.yMax)
@@ -52,7 +59,7 @@ namespace Behc.Mvp.Utils
             }
             else
             {
-                if (alignment == PopupMenuManagerPresenter.Alignment.LEFT)
+                if (alignment == Alignment.LEFT)
                 {
                     tmRect.position = new Vector2(ownerRect.xMin - tmRect.width - separation.x, ownerRect.yMax + separation.y) - Vector2.Scale(tmPivot, tmRect.size);
                     if (tmRect.xMin < parentRect.xMin)

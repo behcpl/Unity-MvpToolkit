@@ -18,9 +18,6 @@ namespace Behc.MiniDi
             _container = container;
             _presenterMap = presenterMap;
             _updateKernel = updateKernel;
-
-            for (int i = 0; i < initialPoolSize; i++)
-                _unused.Add(CreateNewObject(_container));
         }
 
         public IPresenter CreatePresenter(RectTransform parentTransform)
@@ -58,6 +55,14 @@ namespace Behc.MiniDi
 
         protected abstract void Inject(IPresenter presenter);
 
+        protected void InitializePool(int initialPoolSize)
+        {
+            for (int i = 0; i < initialPoolSize; i++)
+            {
+                _unused.Add(CreateNewObject(_container));
+            }
+        }
+
         private IPresenter CreateNewObject(Transform container)
         {
             GameObject instance = Object.Instantiate(_prefab, container, false);
@@ -77,6 +82,7 @@ namespace Behc.MiniDi
             : base(prefab, container, presenterMap, updateKernel, initialPoolSize)
         {
             _param1 = p1;
+            InitializePool(initialPoolSize);
         }
 
         protected override void Inject(IPresenter presenter)
@@ -96,6 +102,7 @@ namespace Behc.MiniDi
         {
             _param1 = p1;
             _param2 = p2;
+            InitializePool(initialPoolSize);
         }
 
         protected override void Inject(IPresenter presenter)
@@ -117,6 +124,7 @@ namespace Behc.MiniDi
             _param1 = p1;
             _param2 = p2;
             _param3 = p3;
+            InitializePool(initialPoolSize);
         }
 
         protected override void Inject(IPresenter presenter)
@@ -140,6 +148,7 @@ namespace Behc.MiniDi
             _param2 = p2;
             _param3 = p3;
             _param4 = p4;
+            InitializePool(initialPoolSize);
         }
 
         protected override void Inject(IPresenter presenter)

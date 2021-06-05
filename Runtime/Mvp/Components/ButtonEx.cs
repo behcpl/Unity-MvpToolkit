@@ -131,6 +131,12 @@ namespace Behc.Mvp.Components
         {
             if (eventData.button == PointerEventData.InputButton.Left)
             {
+                if (_longPressCoroutine != null)
+                {
+                    StopCoroutine(_longPressCoroutine);
+                    _longPressCoroutine = null;
+                }
+                
                 Pressed = false;
                 UpdateState();
 
@@ -191,7 +197,9 @@ namespace Behc.Mvp.Components
         {
             if (_dirty && !_skipNotify)
             {
+#if BEHC_MVPTOOLKIT_VERBOSE
                 Debug.Log($"GameObject: {gameObject.name} state:{State} selected:{Selected} toggled:{Toggled}");
+#endif
                 onStateChange.Invoke();
                 _dirty = false;
             }
