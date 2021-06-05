@@ -36,6 +36,7 @@ Minimal hello-world style game, requires a scene with PresenterKernel, DataSlotP
     {
         [SerializeField] private PresenterUpdateKernel _updateKernel;
         [SerializeField] private RectTransform _container; //for inactive panels
+        [SerializeField] private DataSlotPresenter _mainPanelPresenter; //top-most slot, where we can put some panels
         [SerializeField] private HelloWorldPresenter _helloWorldPresenter;
 
         private readonly PresenterMap _rootPresenterMap = new PresenterMap(null);
@@ -65,3 +66,6 @@ Minimal hello-world style game, requires a scene with PresenterKernel, DataSlotP
     
     // HelloWorldPresenter.cs
     public class HelloWorldPresenter : PanelBase<HelloWorld> {}
+
+For more examples, install samples from package.
+  
