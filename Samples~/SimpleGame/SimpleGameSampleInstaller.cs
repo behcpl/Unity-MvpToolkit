@@ -8,15 +8,18 @@ using UnityEngine;
 namespace DataPresentersGallerySample
 {
     [InitializeOnLoad]
-    public static class DataPresentersGallerySampleInstaller
+    public static class SimpleGameSampleInstaller
     {
-        private const string _ROOT_SCENE = "Assets/DataPresentersGallery/RootScene/DataPresentersGalleryRootScene.unity";
-        private const string _ELEMENTS_SCENE = "Assets/DataPresentersGallery/ElementsScene/DataPresentersGalleryElementsScene.unity";
+        private const string _PRELOADER_SCENE = "Assets/SimpleGame/PreloaderScene/SimpleGamePreloaderScene.unity";
+        private const string _ROOT_SCENE = "Assets/SimpleGame/RootScene/SimpleGameRootScene.unity";
+        private const string _LOBBY_SCENE = "Assets/SimpleGame/LobbyScene/SimpleGameLobbyScene.unity";
+        private const string _GAMEPLAY_SCENE = "Assets/SimpleGame/GameplayScene/SimpleGameGameplayScene.unity";
+        private const string _RANKING_SCENE = "Assets/SimpleGame/RankingScene/SimpleGameRankingScene.unity";
 
-        private const string _PACKAGE_NAME = "sample_gallery";
-        private const string _ASSET_PACKAGE_PATH = "Packages/com.behc.mvptoolkit/AssetPackages/sample_gallery.unitypackage";
+        private const string _PACKAGE_NAME = "simple_game";
+        private const string _ASSET_PACKAGE_PATH = "Packages/com.behc.mvptoolkit/AssetPackages/simple_game.unitypackage";
 
-        static DataPresentersGallerySampleInstaller()
+        static SimpleGameSampleInstaller()
         {
             AssetDatabase.importPackageCompleted += OnImportPackageCompleted;
 
@@ -29,7 +32,7 @@ namespace DataPresentersGallerySample
             }
             else
             {
-                DataPresentersGallerySampleWindow.ShowWindow();
+                SimpleGameSampleWindow.ShowWindow();
             }
         }
 
@@ -61,20 +64,35 @@ namespace DataPresentersGallerySample
         private static void SetupScenes()
         {
             List<EditorBuildSettingsScene> scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+  
+            if (scenes.Find(i => i.path == _PRELOADER_SCENE) == null)
+            {
+                scenes.Add(new EditorBuildSettingsScene(_PRELOADER_SCENE, true));
+            }
 
             if (scenes.Find(i => i.path == _ROOT_SCENE) == null)
             {
                 scenes.Add(new EditorBuildSettingsScene(_ROOT_SCENE, true));
             }
 
-            if (scenes.Find(i => i.path == _ELEMENTS_SCENE) == null)
+            if (scenes.Find(i => i.path == _LOBBY_SCENE) == null)
             {
-                scenes.Add(new EditorBuildSettingsScene(_ELEMENTS_SCENE, true));
+                scenes.Add(new EditorBuildSettingsScene(_LOBBY_SCENE, true));
+            }
+
+            if (scenes.Find(i => i.path == _GAMEPLAY_SCENE) == null)
+            {
+                scenes.Add(new EditorBuildSettingsScene(_GAMEPLAY_SCENE, true));
+            }
+
+            if (scenes.Find(i => i.path == _RANKING_SCENE) == null)
+            {
+                scenes.Add(new EditorBuildSettingsScene(_RANKING_SCENE, true));
             }
 
             EditorBuildSettings.scenes = scenes.ToArray();
 
-            EditorSceneManager.OpenScene(_ROOT_SCENE);
+            EditorSceneManager.OpenScene(_PRELOADER_SCENE);
         }
 
         private static void SetupLayers()
