@@ -3,7 +3,6 @@
 (in no particular order)
 
 * Documentation, more documentation and even more documentation!
-* Sample scenes to show basic application configuration
 * Cleanup and optimize DataCollectionAnimatedPresenter
 * Add grid support for DataCollectionAnimatedPresenter (nicer animations of moving elements)
 * Add new animation type for resizing (not scaling) RectTransforms, can be usefull for popup menu or drop down boxes
