@@ -1,44 +1,70 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Behc.Mvp.Model;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace Behc.Mvp.PopupMenuManager
 {
     public class PopupMenuManager : ReactiveModel, IDataCollection
     {
-        public IEnumerable<object> Items => _items;
+        public enum Placement
+        {
+            PLACE_AT_CURSOR,
+            RIGHT_OF_RECT,
+            LEFT_OF_RECT,
+            TOP_OF_RECT,
+            BOTTOM_OF_RECT,
+        }
+
+        private class ItemType
+        {
+            public object Model;
+            public Placement Placement;
+            public Rect Rect;
+        }
+
+        public IEnumerable<object> Items => _items.Select(i => i.Model);
         public int ItemsCount => _items.Count;
 
-        private readonly List<object> _items = new List<object>(16);
+        private readonly List<ItemType> _items = new List<ItemType>(16);
 
         public void Add(object model)
         {
             Assert.IsNotNull(model);
-            Assert.IsFalse(_items.IndexOf(model) >= 0);
+            Assert.IsNull(_items.Find(i => i.Model == model));
 
-            _items.Add(model);
+            _items.Add(new ItemType { Model = model, Placement = Placement.PLACE_AT_CURSOR });
+            NotifyChanges();
+        }
+
+        public void Add(object model, Placement placement, Rect rect)
+        {
+            Assert.IsNotNull(model);
+            Assert.IsNull(_items.Find(i => i.Model == model));
+
+            _items.Add(new ItemType { Model = model, Placement = placement, Rect = rect });
             NotifyChanges();
         }
 
         public void Remove(object model)
         {
             Assert.IsNotNull(model);
-            Assert.IsTrue(_items.IndexOf(model) >= 0);
+            Assert.IsNotNull(_items.Find(i => i.Model == model));
 
-            _items.Remove(model);
+            _items.RemoveAll(i => i.Model == model);
             NotifyChanges();
         }
-        
-        public void RemoveAfter(object model)
+
+        public void RemoveAllAfter(object model)
         {
             Assert.IsNotNull(model);
-            Assert.IsTrue(_items.IndexOf(model) >= 0);
 
-            int index = _items.IndexOf(model);
-            if (index < _items.Count - 1)
+            int index = _items.FindIndex(0, i => i.Model == model);
+            if (index >= 0 && index < _items.Count - 1)
             {
                 _items.RemoveRange(index + 1, _items.Count - index - 1);
-                NotifyChanges();              
+                NotifyChanges();
             }
         }
 
@@ -46,6 +72,16 @@ namespace Behc.Mvp.PopupMenuManager
         {
             _items.Clear();
             NotifyChanges();
+        }
+
+        public Placement GetItemPlacement(object model)
+        {
+            return _items.Find(i => i.Model == model)?.Placement ?? Placement.PLACE_AT_CURSOR;
+        }
+        
+        public Rect GetItemRect(object model)
+        {
+            return _items.Find(i => i.Model == model)?.Rect ?? Rect.zero;
         }
     }
 }
