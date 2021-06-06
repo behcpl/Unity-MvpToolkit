@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2021-06-06
+### Bugfixes
+- Fixed missing using for InputModule path
+
 ## [0.6.0] - 2021-06-05
 ### Added
 - Simple Game Sample - shows basic navigation
