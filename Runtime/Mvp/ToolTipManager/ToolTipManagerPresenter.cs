@@ -2,11 +2,11 @@
 using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.EventSystems;
 #if BEHC_MVPTOOLKIT_INPUTSYSTEM
 using UnityEngine.InputSystem;
 #endif
-using UnityEngine.UI;
 
 namespace Behc.Mvp.ToolTipManager
 {

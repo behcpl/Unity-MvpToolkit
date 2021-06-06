@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+#if BEHC_MVPTOOLKIT_INPUTSYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace Behc.Mvp.PopupMenuManager
 {
