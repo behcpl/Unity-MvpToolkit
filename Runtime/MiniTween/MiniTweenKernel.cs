@@ -37,6 +37,9 @@ namespace Behc.MiniTween
                 if (Completed)
                     return;
                 
+                Setter(Owner, ValueTo);
+                OnUpdate?.Invoke();
+
                 OnComplete?.Invoke();
                 Completed = true;
             }
