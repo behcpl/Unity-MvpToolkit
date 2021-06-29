@@ -80,7 +80,7 @@ namespace Behc.Mvp.DataCollection
 #pragma warning restore CS0649
 
         private List<ItemDesc> _itemPresenters = new List<ItemDesc>();
-        private List<ItemDesc> _removedItems = new List<ItemDesc>();
+        private readonly List<ItemDesc> _removedItems = new List<ItemDesc>();
         private Dictionary<object, int> _itemIdToIndex = new Dictionary<object, int>();
         private List<Rect> _itemRects = new List<Rect>();
 
@@ -136,6 +136,8 @@ namespace Behc.Mvp.DataCollection
 
         public override void Unbind()
         {
+            AbortAnimations();
+            
             foreach (ItemDesc itemDesc in _removedItems)
             {
                 if (itemDesc.Presenter == null)
@@ -361,7 +363,7 @@ namespace Behc.Mvp.DataCollection
                 {
                     _state = State.READY;
                     _onAnimateShowCompleted?.Invoke();
-                    _onAnimateShowCompleted = null;           
+                    _onAnimateShowCompleted = null;
                 }
             }
 
@@ -501,6 +503,19 @@ namespace Behc.Mvp.DataCollection
                             SetInsetAndSize(itemDesc.Presenter.RectTransform, oldRect.position.x, oldRect.position.y, oldRect.width, oldRect.height);
 
                             itemDesc.Presenter.Rebind(item);
+
+                            if (itemDesc.Presenter.IsAnimating) //force finish any spawning animation
+                                itemDesc.Presenter.AbortAnimations();
+
+                            if (itemDesc.ItemState == ItemState.WAITING_FOR_SHOW_ANIMATION_ITEM)
+                            {
+                                itemDesc.ItemState = ItemState.READY;
+                                if (IsActive && !itemDesc.Active)
+                                {
+                                    itemDesc.Presenter.Activate();
+                                    itemDesc.Active = true;
+                                }
+                            }
                         }
 
                         itemDesc.ItemState = ItemState.MOVING;
@@ -792,7 +807,7 @@ namespace Behc.Mvp.DataCollection
                     //TODO:
                 }
 
-                if (itemDesc.ItemState == ItemState.READY && IsActive && !itemDesc.Active)
+                if ((itemDesc.ItemState == ItemState.READY || itemDesc.ItemState == ItemState.MOVING) && IsActive && !itemDesc.Active)
                 {
                     itemDesc.Presenter.Activate();
                     itemDesc.Active = true;
