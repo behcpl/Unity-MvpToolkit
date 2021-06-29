@@ -12,6 +12,13 @@ namespace Behc.Mvp.Panel
         [SerializeField] protected GraphicRaycaster _graphicRaycaster;
 #pragma warning restore CS0649
 
+        public override void Initialize(PresenterMap presenterMap, PresenterUpdateKernel kernel)
+        {
+            base.Initialize(presenterMap, kernel);
+            
+            _graphicRaycaster.enabled = false;
+        }
+
         public override void Activate()
         {
             base.Activate();
