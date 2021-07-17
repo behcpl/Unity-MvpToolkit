@@ -3,6 +3,7 @@ using Behc.MiniTween;
 using Behc.MiniTween.Extensions;
 using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
+using Behc.Utils;
 using UnityEngine;
 
 namespace Behc.Mvp.DataSlot
@@ -51,7 +52,7 @@ namespace Behc.Mvp.DataSlot
 
             ITweenSystem tweenSystem = _tweenProvider.GetTweenSystem();
 
-            if (_options != null)
+            if (_options.IsNotNull())
             {
                 showDuration = _options.ShowDuration;
                 hideDuration = _options.HideDuration;

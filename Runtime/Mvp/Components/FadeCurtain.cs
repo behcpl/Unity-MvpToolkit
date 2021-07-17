@@ -79,7 +79,6 @@ namespace Behc.Mvp.Components
             _tween = _auxGroup.AnimateAlpha(_tweenProvider.GetTweenSystem(), 0, _fadeDuration);
             _tween.SetUpdateCallback(() =>
             {
-                // float s = _tweener.ElapsedPercentage(false);
                 float cs = _auxGroup.alpha;
                 _mainGroup.alpha = (_alpha - cs) / (1.0f - cs);
             });

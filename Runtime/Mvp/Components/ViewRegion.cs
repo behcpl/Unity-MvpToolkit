@@ -1,4 +1,5 @@
 ﻿using System;
+using Behc.Utils;
 using UnityEngine;
 
 namespace Behc.Mvp.Components
@@ -52,7 +53,7 @@ namespace Behc.Mvp.Components
 
             _worldRect = Rect.MinMaxRect(wMin.x, wMin.y, wMax.x, wMax.y);
 
-            if (_parentRegion != null)
+            if (_parentRegion.IsNotNull())
             {
                 _parentRegion.UpdateRects();
                 _intersectionRect = Rect.MinMaxRect(

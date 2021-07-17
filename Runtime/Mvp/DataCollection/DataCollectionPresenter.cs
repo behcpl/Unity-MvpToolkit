@@ -4,6 +4,7 @@ using Behc.Mvp.Components;
 using Behc.Mvp.DataCollection.Layout;
 using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
+using Behc.Utils;
 using UnityEngine;
 
 namespace Behc.Mvp.DataCollection
@@ -179,7 +180,7 @@ namespace Behc.Mvp.DataCollection
 
             _itemRects.Clear();
 
-            bool alwaysVisible = _viewRegion == null;
+            bool alwaysVisible = _viewRegion.IsNull();
             bool neverVisible = !alwaysVisible && (_clipRect.width <= 0 || _clipRect.height <= 0);
 
             Rect rect = RectTransform.rect;
@@ -252,8 +253,7 @@ namespace Behc.Mvp.DataCollection
 
         private void UpdateLayout()
         {
-            // Debug.Log($"TestCollectionPresenter::UpdateLayout <<{TestCounter.Counter}>>");
-            bool alwaysVisible = _viewRegion == null;
+            bool alwaysVisible = _viewRegion.IsNull();
             bool neverVisible = !alwaysVisible && (_clipRect.width <= 0 || _clipRect.height <= 0);
 
             _itemRects.Clear();
@@ -289,8 +289,7 @@ namespace Behc.Mvp.DataCollection
 
         private void UpdateVisibility()
         {
-            // Debug.Log($"TestCollectionPresenter::UpdateVisibility <<{TestCounter.Counter}>>");
-            bool alwaysVisible = _viewRegion == null;
+            bool alwaysVisible = _viewRegion.IsNull();
 
             bool neverVisible = !alwaysVisible && (_clipRect.width <= 0 || _clipRect.height <= 0);
             for (int i = 0; i < _itemPresenters.Count; i++)
@@ -350,7 +349,7 @@ namespace Behc.Mvp.DataCollection
             if (_model == null)
                 return;
 
-            if (_viewRegion != null)
+            if (_viewRegion.IsNotNull())
                 UpdateClipRect(_viewRegion.ClipRect, out _visibilityChanged);
 
             Rect rect = RectTransform.rect;

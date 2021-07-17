@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Behc.Utils;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -218,7 +219,7 @@ namespace Behc.Mvp.Components
         private IEnumerator HoverWait()
         {
             float delay = 0.2f;
-            if (_options != null)
+            if (_options.IsNotNull())
                 delay = _options.HoverDelay;
 
             yield return new WaitForSecondsRealtime(delay); //TODO: cache
@@ -229,7 +230,7 @@ namespace Behc.Mvp.Components
         private IEnumerator LongPressWait()
         {
             float duration = 0.5f;
-            if (_options != null)
+            if (_options.IsNotNull())
                 duration = _options.LongPressDuration;
 
             yield return new WaitForSecondsRealtime(duration); //TODO: cache

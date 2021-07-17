@@ -4,6 +4,7 @@ using Behc.Mvp.Components;
 using Behc.Mvp.DataCollection.Layout;
 using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
+using Behc.Utils;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -397,7 +398,7 @@ namespace Behc.Mvp.DataCollection
         {
             Assert.IsTrue(_itemPresenters.Count == 0 && _itemIdToIndex.Count == 0 && _itemRects.Count == 0, "Should be empty!");
 
-            bool alwaysVisible = _viewRegion == null;
+            bool alwaysVisible = _viewRegion.IsNull();
             bool neverVisible = !alwaysVisible && (_clipRect.width <= 0 || _clipRect.height <= 0);
 
             Rect rect = RectTransform.rect;
@@ -444,7 +445,6 @@ namespace Behc.Mvp.DataCollection
             if (_state == State.WAITING_FOR_ANIMATE_SHOW || _state == State.ANIMATE_HIDE || _state == State.WAITING_FOR_DESPAWN)
                 return;
 
-            // Debug.Log($"TestCollectionPresenter::UpdateContent <<{TestCounter.Counter}>>");
             //TODO: add fast path, when nothing changes?
             //TODO: add fast path for clearing/resetting?
 
@@ -456,7 +456,7 @@ namespace Behc.Mvp.DataCollection
             _itemIdToIndex = new Dictionary<object, int>();
             _itemRects = new List<Rect>();
 
-            bool alwaysVisible = _viewRegion == null;
+            bool alwaysVisible = _viewRegion.IsNull();
             bool neverVisible = !alwaysVisible && (_clipRect.width <= 0 || _clipRect.height <= 0);
 
             Rect rect = RectTransform.rect;
@@ -637,8 +637,7 @@ namespace Behc.Mvp.DataCollection
 
         private void UpdateLayout()
         {
-            // Debug.Log($"TestCollectionPresenter::UpdateLayout <<{TestCounter.Counter}>>");
-            bool alwaysVisible = _viewRegion == null;
+            bool alwaysVisible = _viewRegion.IsNull();
             bool neverVisible = !alwaysVisible && (_clipRect.width <= 0 || _clipRect.height <= 0);
 
             _itemRects.Clear();
@@ -688,7 +687,7 @@ namespace Behc.Mvp.DataCollection
             //or just always try to always call animateXX with high offset value (but that will keep animating items forever)
 
             // Debug.Log($"TestCollectionPresenter::UpdateVisibility <<{TestCounter.Counter}>>");
-            bool alwaysVisible = _viewRegion == null;
+            bool alwaysVisible = _viewRegion.IsNull();
 
             bool neverVisible = !alwaysVisible && (_clipRect.width <= 0 || _clipRect.height <= 0);
             for (int i = 0; i < _itemPresenters.Count; i++)
@@ -845,7 +844,7 @@ namespace Behc.Mvp.DataCollection
             if (_model == null)
                 return;
 
-            if (_viewRegion != null)
+            if (_viewRegion.IsNotNull())
                 UpdateClipRect(_viewRegion.ClipRect, out _visibilityChanged);
 
             Rect rect = RectTransform.rect;
