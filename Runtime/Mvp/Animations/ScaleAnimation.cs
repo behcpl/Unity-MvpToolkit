@@ -1,5 +1,6 @@
 ﻿using System;
 using Behc.MiniTween;
+using Behc.MiniTween.Extensions;
 using UnityEngine;
 
 namespace Behc.Mvp.Animations

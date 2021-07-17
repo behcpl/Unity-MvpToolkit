@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Behc.Mvp.Utils
+namespace Behc.Utils
 {
     public struct WhenBoth
     {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Behc.Utils
 {
@@ -9,6 +10,21 @@ namespace Behc.Utils
         public GenericDisposable(Action disposeAction)
         {
             _disposeAction = disposeAction;
+        }
+
+        public GenericDisposable(IEnumerable<IDisposable> disposables, Action disposeBefore = null, Action disposeAfter = null)
+        {
+            _disposeAction = () =>
+            {
+                disposeBefore?.Invoke();
+
+                foreach (IDisposable disposable in disposables)
+                {
+                    disposable.Dispose();
+                }
+
+                disposeAfter?.Invoke();
+            };
         }
 
         public void Dispose()

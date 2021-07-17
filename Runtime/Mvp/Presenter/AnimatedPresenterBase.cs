@@ -4,6 +4,7 @@ using Behc.Mvp.Components;
 using Behc.Mvp.Model;
 using Behc.Mvp.Utils;
 using UnityEngine;
+using Behc.Utils;
 
 // ReSharper disable InconsistentNaming
 

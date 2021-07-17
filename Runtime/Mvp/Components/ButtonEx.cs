@@ -16,7 +16,7 @@ namespace Behc.Mvp.Components
             PRESSED,
         }
 
-        public StateType State { get; private set; }
+        public StateType State { get; private set; } = StateType.NORMAL;
         public bool Highlighted { get; private set; }
         public bool Pressed { get; private set; }
         public bool Selected { get; private set; }
@@ -75,6 +75,16 @@ namespace Behc.Mvp.Components
         private void OnDisable()
         {
             StopCoroutines();
+
+            _dirty = false;
+            _skipNotify = false;
+
+            _longPressFired = false;
+
+            Highlighted = false;
+            Pressed = false;
+            Selected = false;
+            State = Interactable ? StateType.NORMAL : StateType.DISABLED;
         }
 
         public void OnPointerEnter(PointerEventData eventData)
@@ -136,7 +146,7 @@ namespace Behc.Mvp.Components
                     StopCoroutine(_longPressCoroutine);
                     _longPressCoroutine = null;
                 }
-                
+
                 Pressed = false;
                 UpdateState();
 
@@ -210,7 +220,7 @@ namespace Behc.Mvp.Components
             float delay = 0.2f;
             if (_options != null)
                 delay = _options.HoverDelay;
-                
+
             yield return new WaitForSecondsRealtime(delay); //TODO: cache
             onHover.Invoke();
             _hoverCoroutine = null;

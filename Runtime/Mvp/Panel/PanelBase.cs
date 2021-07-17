@@ -4,6 +4,7 @@ using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Behc.Utils;
 
 namespace Behc.Mvp.Panel
 {

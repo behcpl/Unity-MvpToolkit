@@ -1,5 +1,6 @@
 ﻿using System;
 using Behc.MiniTween;
+using Behc.MiniTween.Extensions;
 using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
 // using DG.Tweening;

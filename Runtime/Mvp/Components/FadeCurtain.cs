@@ -1,4 +1,5 @@
 ﻿using Behc.MiniTween;
+using Behc.MiniTween.Extensions;
 using UnityEngine;
 using UnityEngine.Assertions;
 
