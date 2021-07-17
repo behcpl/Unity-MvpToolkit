@@ -6,6 +6,8 @@ using Behc.Mvp.Utils;
 using UnityEngine;
 using UnityEngine.UI;
 
+// ReSharper disable SuspiciousTypeConversion.Global
+
 namespace Behc.Mvp.ToastManager
 {
     public class ToastManagerPresenter : DataPresenterBase<ToastManager>

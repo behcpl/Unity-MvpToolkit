@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Behc.Mvp.Model;
+using Behc.Utils;
 using UnityEngine;
 
 // ReSharper disable InconsistentNaming
@@ -18,7 +19,7 @@ namespace Behc.Mvp.Presenter
         {
             get
             {
-                if (_rectTransform == null)
+                if (_rectTransform.IsNull())
                     _rectTransform = GetComponent<RectTransform>();
                 return _rectTransform;
             }

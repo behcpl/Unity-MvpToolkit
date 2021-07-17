@@ -1,15 +1,18 @@
 ﻿using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
+using Behc.Utils;
+
+// ReSharper disable SuspiciousTypeConversion.Global
 
 namespace Behc.Mvp.DataStack
 {
-    public class DataStackPresenter :  AnimatedPresenterBase<DataStack>
+    public class DataStackPresenter : AnimatedPresenterBase<DataStack>
     {
         public override void Bind(object model, IPresenter parent, bool prepareForAnimation)
         {
             base.Bind(model, parent, prepareForAnimation);
-    
-            if (_curtain != null)
+
+            if (_curtain.IsNotNull())
             {
                 DisposeOnUnbind(_curtain.OnTrigger.Subscribe(CurtainClicked));
 
@@ -38,7 +41,7 @@ namespace Behc.Mvp.DataStack
                 }
             }
         }
-        
+
         public override void Deactivate()
         {
             if (_items.Count > 0)
@@ -58,7 +61,7 @@ namespace Behc.Mvp.DataStack
         {
             int oldCount = _items.Count;
             base.UpdateContent();
- 
+
             for (int index = 0; index < _items.Count - 1; index++)
             {
                 ItemDesc desc = _items[index];
@@ -79,7 +82,7 @@ namespace Behc.Mvp.DataStack
                 }
             }
 
-            if (_curtain != null)
+            if (_curtain.IsNotNull())
             {
                 if (_items.Count == 0)
                 {

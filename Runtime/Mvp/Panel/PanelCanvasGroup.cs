@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Behc.Mvp.Presenter;
+using UnityEngine;
 
 namespace Behc.Mvp.Panel
 {
@@ -7,6 +8,13 @@ namespace Behc.Mvp.Panel
 #pragma warning disable CS0649
         [SerializeField] protected CanvasGroup _canvasGroup;
 #pragma warning restore CS0649
+
+        public override void Initialize(PresenterMap presenterMap, PresenterUpdateKernel kernel)
+        {
+            base.Initialize(presenterMap, kernel);
+
+            _canvasGroup.interactable = false;
+        }
 
         public override void Activate()
         {

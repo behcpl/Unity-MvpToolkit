@@ -1,7 +1,9 @@
 ﻿using System;
 using Behc.MiniTween;
+using Behc.MiniTween.Extensions;
 using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
+using Behc.Utils;
 // using DG.Tweening;
 using UnityEngine;
 
@@ -50,7 +52,7 @@ namespace Behc.Mvp.DataSlot
             float duration = 0.2f;
             AnimationCurve curve = null;
 
-            if (_options != null)
+            if (_options.IsNotNull())
             {
                 duration = _options.TransitionDuration;
                 curve = _options.TransitionCurve;

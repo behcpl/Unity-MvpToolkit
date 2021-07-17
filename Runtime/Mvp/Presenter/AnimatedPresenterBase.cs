@@ -4,6 +4,7 @@ using Behc.Mvp.Components;
 using Behc.Mvp.Model;
 using Behc.Mvp.Utils;
 using UnityEngine;
+using Behc.Utils;
 
 // ReSharper disable InconsistentNaming
 
@@ -44,7 +45,7 @@ namespace Behc.Mvp.Presenter
             base.Bind(model, parent, prepareForAnimation);
 
             Canvas canvas = GetComponent<Canvas>();
-            if (canvas != null && canvas.overrideSorting)
+            if (canvas.IsNotNull())
                 _layerId = canvas.sortingLayerID;
 
             int order = _sortingStep;

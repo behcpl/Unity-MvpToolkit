@@ -2,6 +2,8 @@
 using Behc.Mvp.Presenter;
 using UnityEngine;
 
+// ReSharper disable SuspiciousTypeConversion.Global
+
 namespace Behc.MiniDi
 {
     public abstract class PooledInjectableFactory : IPresenterFactory
@@ -12,7 +14,7 @@ namespace Behc.MiniDi
         private readonly Transform _container;
         private readonly List<IPresenter> _unused = new List<IPresenter>();
 
-        protected PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, int initialPoolSize)
+        protected PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel)
         {
             _prefab = prefab;
             _container = container;
@@ -79,7 +81,7 @@ namespace Behc.MiniDi
         private readonly T1 _param1;
 
         public PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, int initialPoolSize, in T1 p1)
-            : base(prefab, container, presenterMap, updateKernel, initialPoolSize)
+            : base(prefab, container, presenterMap, updateKernel)
         {
             _param1 = p1;
             InitializePool(initialPoolSize);
@@ -98,7 +100,7 @@ namespace Behc.MiniDi
         private readonly T2 _param2;
 
         public PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, int initialPoolSize, in T1 p1, in T2 p2)
-            : base(prefab, container, presenterMap, updateKernel, initialPoolSize)
+            : base(prefab, container, presenterMap, updateKernel)
         {
             _param1 = p1;
             _param2 = p2;
@@ -119,7 +121,7 @@ namespace Behc.MiniDi
         private readonly T3 _param3;
 
         public PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, int initialPoolSize, in T1 p1, in T2 p2, in T3 p3)
-            : base(prefab, container, presenterMap, updateKernel, initialPoolSize)
+            : base(prefab, container, presenterMap, updateKernel)
         {
             _param1 = p1;
             _param2 = p2;
@@ -142,7 +144,7 @@ namespace Behc.MiniDi
         private readonly T4 _param4;
 
         public PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, int initialPoolSize, in T1 p1, in T2 p2, in T3 p3, in T4 p4)
-            : base(prefab, container, presenterMap, updateKernel, initialPoolSize)
+            : base(prefab, container, presenterMap, updateKernel)
         {
             _param1 = p1;
             _param2 = p2;

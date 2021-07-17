@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Behc.Utils;
+using UnityEngine;
 
 namespace Behc.MiniTween
 {
@@ -11,9 +12,11 @@ namespace Behc.MiniTween
         
         public override ITweenSystem GetTweenSystem()
         {
-            if (_kernel == null)
+            if (_kernel.IsNull())
             {
+#if BEHC_MVPTOOLKIT_VERBOSE
                 Debug.LogWarning("Creating new MiniTween kernel!");
+#endif
                 GameObject go = new GameObject("MiniTween");
                 _kernel = go.AddComponent<MiniTweenKernel>();
                 _kernel.Initialize(this);
