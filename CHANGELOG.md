@@ -4,7 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.6.2] - 2021-06-06
+### Bugfixes
+- Fixed ButtonEx initial state
+- Fixed MiniTween skipping setter callback on complete
+- Fixed DataCollectionAnimatedPresenter animation bugs
+- Fixed Panels not starting deactivated
+### Breaking Changes
+- Improved Utils folder consistency
+- Moved MiniTween extensions to separate namespace
+### Changes
+- Optimized null-checks for Unity Object types (skipping native object check when not needed)
+### Added
+- More MiniTween animating extensions
 
 ## [0.6.1] - 2021-06-06
 ### Bugfixes
