@@ -78,13 +78,13 @@ namespace Behc.Mvp.DataSlot
             }
 
 
-            _nextModel = _model.Data;
+            _nextModel = ((IDataSlot)_model).Data;
 
             IPresenter fromPresenter = _activePresenter;
             object fromModel = _activeModel;
 
-            IPresenter toPresenter = CreatePresenter(_model.Data);
-            object toModel = _model.Data;
+            IPresenter toPresenter = CreatePresenter(_nextModel);
+            object toModel = _nextModel;
 
             if (fromPresenter != null)
             {

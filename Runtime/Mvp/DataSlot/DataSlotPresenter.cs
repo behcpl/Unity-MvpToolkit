@@ -1,4 +1,5 @@
 ﻿using System;
+using Behc.Mvp.Model;
 using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine;
 
 namespace Behc.Mvp.DataSlot
 {
-    public class DataSlotPresenter : DataPresenterBase<DataSlot>
+    public class DataSlotPresenter : DataPresenterBase<ReactiveModel>
     {
 #pragma warning disable CS0649
         [SerializeField] private bool _preserveChildTransform;
@@ -89,7 +90,7 @@ namespace Behc.Mvp.DataSlot
                 action.Invoke();
             }
 
-            if (_activeModel == _model.Data || IsAnimating && _nextModel == _model.Data)
+            if (_activeModel == ((IDataSlot)_model).Data || IsAnimating && _nextModel == ((IDataSlot)_model).Data)
             {
                 return;
             }
@@ -106,13 +107,13 @@ namespace Behc.Mvp.DataSlot
 
         protected virtual void DoTransition()
         {
-            _nextModel = _model.Data;
+            _nextModel = ((IDataSlot)_model).Data;
 
             IPresenter fromPresenter = _activePresenter;
             object fromModel = _activeModel;
 
-            IPresenter toPresenter = CreatePresenter(_model.Data);
-            object toModel = _model.Data;
+            IPresenter toPresenter = CreatePresenter(_nextModel);
+            object toModel = _nextModel;
 
             _suppressActivation = true;
 
@@ -146,7 +147,7 @@ namespace Behc.Mvp.DataSlot
             if (model == null)
                 return null;
 
-            IPresenter presenter = PresenterMap.CreatePresenter(_model.Data, RectTransform);
+            IPresenter presenter = PresenterMap.CreatePresenter(((IDataSlot)_model).Data, RectTransform);
             if (!_preserveChildTransform)
             {
                 RectTransform rt = presenter.RectTransform;
@@ -163,9 +164,9 @@ namespace Behc.Mvp.DataSlot
 
         private void BindData()
         {
-            if (_model.Data != null)
+            if (((IDataSlot)_model).Data != null)
             {
-                _activeModel = _model.Data;
+                _activeModel = ((IDataSlot)_model).Data;
                 _activePresenter = CreatePresenter(_activeModel);
                 BindingHelper.Bind(_activeModel, _activePresenter, this, false);
             }

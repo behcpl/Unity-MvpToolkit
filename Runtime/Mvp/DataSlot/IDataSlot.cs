@@ -2,6 +2,6 @@
 {
     public interface IDataSlot
     {
-        object Data { get; set; }
+        object Data { get; }
     }
 }
