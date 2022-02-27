@@ -14,7 +14,6 @@ namespace Behc.Mvp.Presenter
         void Destroy();
 
         void Bind(object model, IPresenter parent, bool prepareForAnimation);
-        void Rebind(object model);
         void Unbind();
 
         void AnimateShow(float startTime, Action onFinish);

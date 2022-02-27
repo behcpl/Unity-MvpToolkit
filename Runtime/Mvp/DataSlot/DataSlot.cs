@@ -1,4 +1,5 @@
 ﻿using Behc.Mvp.Model;
+using JetBrains.Annotations;
 
 namespace Behc.Mvp.DataSlot
 {
@@ -6,6 +7,7 @@ namespace Behc.Mvp.DataSlot
     {
         private object _data;
 
+        [CanBeNull]
         public object Data
         {
             get => _data;
@@ -26,6 +28,7 @@ namespace Behc.Mvp.DataSlot
 
         object IDataSlot.Data => _data;
 
+        [CanBeNull]
         public T Data
         {
             get => _data;

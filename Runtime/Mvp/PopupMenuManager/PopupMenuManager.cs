@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Behc.Mvp.Model;
 using UnityEngine;
@@ -24,10 +25,32 @@ namespace Behc.Mvp.PopupMenuManager
             public Rect Rect;
         }
 
-        public IEnumerable<object> Items => _items.Select(i => i.Model);
-        public int ItemsCount => _items.Count;
+        private class Collection : IReadOnlyCollection<object>
+        {
+            private readonly List<ItemType> _stack;
 
-        private readonly List<ItemType> _items = new List<ItemType>(16);
+            public int Count => _stack.Count;
+
+            public Collection(List<ItemType> stack)
+            {
+                _stack = stack;
+            }
+
+            public IEnumerator<object> GetEnumerator() => _stack.Select(i => i.Model).GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
+        public IReadOnlyCollection<object> Data => _collection;
+
+        private readonly List<ItemType> _items;
+        private readonly Collection _collection;
+
+        public PopupMenuManager()
+        {
+            _items = new List<ItemType>(16);
+            _collection = new Collection(_items);
+        }
 
         public void Add(object model)
         {
@@ -78,7 +101,7 @@ namespace Behc.Mvp.PopupMenuManager
         {
             return _items.Find(i => i.Model == model)?.Placement ?? Placement.PLACE_AT_CURSOR;
         }
-        
+
         public Rect GetItemRect(object model)
         {
             return _items.Find(i => i.Model == model)?.Rect ?? Rect.zero;

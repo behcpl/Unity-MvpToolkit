@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Behc.Mvp.Model;
@@ -15,11 +16,33 @@ namespace Behc.Mvp.DataStack
             public object DefaultResultValue;
         }
 
-        public object TopLevelData => _stack.Count > 0 ? _stack[_stack.Count - 1].Model : null;
-        public IEnumerable<object> Items => _stack.Select(i => i.Model);
-        public int ItemsCount => _stack.Count;
+        private class Collection : IReadOnlyCollection<object>
+        {
+            private readonly List<ItemType> _stack;
 
-        private readonly List<ItemType> _stack = new List<ItemType>(16);
+            public int Count => _stack.Count;
+
+            public Collection(List<ItemType> stack)
+            {
+                _stack = stack;
+            }
+
+            public IEnumerator<object> GetEnumerator() => _stack.Select(i => i.Model).GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
+        public object TopLevelData => _stack.Count > 0 ? _stack[_stack.Count - 1].Model : null;
+        public IReadOnlyCollection<object> Data => _collection;
+
+        private readonly List<ItemType> _stack;
+        private readonly Collection _collection;
+
+        public DataStack()
+        {
+            _stack = new List<ItemType>(16);
+            _collection = new Collection(_stack);
+        }
 
         public void Push<TResult>(object model, Action<TResult> onClose, TResult defaultResult = default)
         {
@@ -28,11 +51,11 @@ namespace Behc.Mvp.DataStack
             foreach (ItemType item in _stack)
                 Assert.IsFalse(item.Model == model, $"Model {model} already on stack!");
 #endif
-            void OnClose(object result) => onClose?.Invoke((TResult) result);
+            void OnClose(object result) => onClose?.Invoke((TResult)result);
             _stack.Add(new ItemType { Model = model, OnClose = OnClose, DefaultResultValue = defaultResult });
             NotifyChanges();
         }
-        
+
         public void Remove(object model)
         {
             int index = _stack.FindIndex(i => i.Model == model);

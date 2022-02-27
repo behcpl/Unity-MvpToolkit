@@ -27,35 +27,6 @@ namespace Behc.Mvp.DataSlot
             BindData();
         }
 
-        public override void Rebind(object model)
-        {
-            Debug.Assert(_model != null, "Not bound!");
-            // Debug.Assert(_updateKernel.UpdateLoop, "Not in kernel update loop");
-
-#if BEHC_MVPTOOLKIT_VERBOSE
-            Debug.Log($"({name}) Rebind() <<{PresenterUpdateKernel.Counter}>>");
-#endif
-
-            if (!ReferenceEquals(_model, model))
-            {
-                //here we cannot guarantee that Data is compatible with current presenter
-                //probably some optimization opportunity, rebind anyway if new presenter is exactly the same?
-                UnbindData();
-
-                _disposeOnUnbind.ForEach(d => d.Dispose());
-                _disposeOnUnbind.Clear();
-
-                _model = (DataSlot) model;
-                DisposeOnUnbind(_model.Subscribe(ModelChanged));
-
-                BindData();
-            }
-            else
-            {
-                ModelChanged();
-            }
-        }
-
         public override void Unbind()
         {
             Debug.Assert(_model != null, "Not bound!");

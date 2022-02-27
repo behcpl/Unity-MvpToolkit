@@ -70,29 +70,6 @@ namespace Behc.Mvp.Presenter
             DisposeOnUnbind(_model.Subscribe(ModelChanged));
         }
 
-        public virtual void Rebind(object model)
-        {
-            Debug.Assert(_model != null, "Not bound!");
-            Debug.Assert(_updateKernel.UpdateLoop, "Not in kernel update loop");
-
-#if BEHC_MVPTOOLKIT_VERBOSE
-            Debug.Log($"({name}) <color=#CC0000>Rebind</color> <<{PresenterUpdateKernel.Counter}>>");
-#endif
-
-            if (!ReferenceEquals(_model, model))
-            {
-                _disposeOnUnbind.ForEach(d => d.Dispose());
-                _disposeOnUnbind.Clear();
-
-                _model = (T) model;
-                DisposeOnUnbind(_model.Subscribe(ModelChanged));
-            }
-            else
-            {
-                ModelChanged();
-            }
-        }
-
         public virtual void Unbind()
         {
             Debug.Assert(_model != null, "Not bound!");

@@ -49,7 +49,7 @@ namespace Behc.Mvp.Presenter
                 _layerId = canvas.sortingLayerID;
 
             int order = _sortingStep;
-            foreach (object dataModel in _model.Items)
+            foreach (object dataModel in _model.Data)
             {
                 ItemDesc desc = new ItemDesc
                 {
@@ -220,10 +220,10 @@ namespace Behc.Mvp.Presenter
         protected virtual void UpdateContent()
         {
             List<ItemDesc> oldItems = _items;
-            _items = new List<ItemDesc>(_model.ItemsCount);
+            _items = new List<ItemDesc>(_model.Data.Count);
 
             int order = _sortingStep;
-            foreach (object dataModel in _model.Items)
+            foreach (object dataModel in _model.Data)
             {
                 ItemDesc desc = oldItems.Find(i => i.Model == dataModel);
                 if (desc != null)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Behc.Mvp.Components;
 using Behc.Mvp.DataCollection.Layout;
+using Behc.Mvp.Model;
 using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
 using Behc.Utils;
@@ -10,7 +11,7 @@ using UnityEngine.Assertions;
 
 namespace Behc.Mvp.DataCollection
 {
-    public class DataCollectionAnimatedPresenter : DataPresenterBase<DataCollection>
+    public class DataCollectionAnimatedPresenter : DataPresenterBase<ReactiveModel>
     {
         private enum State
         {
@@ -38,7 +39,6 @@ namespace Behc.Mvp.DataCollection
 
         private class ItemDesc
         {
-            public object Id;
             public object Model;
             public IPresenter Presenter;
             public bool Active;
@@ -390,9 +390,9 @@ namespace Behc.Mvp.DataCollection
             _measureItems.Add(type, measure);
         }
 
-        public Vector2 MeasureModel(DataCollection model)
+        public Vector2 MeasureModel(IDataCollection model)
         {
-            return _layout.GetApproximatedContentSize(RectTransform.rect.size, model.ItemsCount);
+            return _layout.GetApproximatedContentSize(RectTransform.rect.size, model.Data.Count);
         }
 
         private void InitializeContent()
@@ -403,28 +403,25 @@ namespace Behc.Mvp.DataCollection
             bool neverVisible = !alwaysVisible && (_clipRect.width <= 0 || _clipRect.height <= 0);
 
             Rect rect = RectTransform.rect;
-            Vector2 initialSize = _layout.GetApproximatedContentSize(rect.size, _model.ItemsCount);
+            Vector2 initialSize = _layout.GetApproximatedContentSize(rect.size, ((IDataCollection)_model).Data.Count);
             _layout.SetContentSize(initialSize.x, initialSize.y);
 
             int index = 0;
             object lastItem = null;
-            foreach (object item in _model.Items)
+            foreach (object item in ((IDataCollection)_model).Data)
             {
-                object id = _model.GetItemId(item);
-
                 EvaluateItemSize(item, lastItem, out Vector2 requestedSize, out float requestedGap);
                 Rect itemRect = _layout.EvaluateRect(index, _itemRects, requestedSize, requestedGap);
 
                 ItemDesc itemDesc = new ItemDesc
                 {
-                    Id = id,
                     Model = item,
                     ItemState = ItemState.READY
                 };
 
                 _itemPresenters.Add(itemDesc);
                 _itemRects.Add(itemRect);
-                _itemIdToIndex.Add(id, index);
+                _itemIdToIndex.Add(item, index);
 
                 UpdateItem(itemDesc, alwaysVisible, neverVisible, itemRect);
 
@@ -461,39 +458,32 @@ namespace Behc.Mvp.DataCollection
             bool neverVisible = !alwaysVisible && (_clipRect.width <= 0 || _clipRect.height <= 0);
 
             Rect rect = RectTransform.rect;
-            Vector2 initialSize = _layout.GetApproximatedContentSize(rect.size, _model.ItemsCount);
+            Vector2 initialSize = _layout.GetApproximatedContentSize(rect.size, ((IDataCollection)_model).Data.Count);
             _layout.SetContentSize(initialSize.x, initialSize.y);
 
             bool hasMovePhase = false;
             int index = 0;
             object lastItem = null;
             float showDelay = 0;
-            foreach (object item in _model.Items)
+            foreach (object item in ((IDataCollection)_model).Data)
             {
                 ItemDesc itemDesc;
-                object id = _model.GetItemId(item);
 
                 EvaluateItemSize(item, lastItem, out Vector2 requestedSize, out float requestedGap);
                 Rect itemRect = _layout.EvaluateRect(index, _itemRects, requestedSize, requestedGap);
                 Rect updateWithRect = itemRect;
 
-                if (oldMapping.TryGetValue(id, out int oldIndex))
+                if (oldMapping.TryGetValue(item, out int oldIndex))
                 {
+                    oldMapping.Remove(item);
                     itemDesc = oldItems[oldIndex];
-                    oldMapping.Remove(itemDesc.Id);
-
-                    itemDesc.Id = id;
-                    itemDesc.Model = item;
 
                     Rect oldRect = oldRects[oldIndex];
-
                     if (SimilarRect(itemRect, oldRect))
                     {
                         if (itemDesc.Presenter != null && (alwaysVisible || !neverVisible && _clipRectFat.Overlaps(itemRect)))
                         {
                             SetInsetAndSize(itemDesc.Presenter.RectTransform, itemRect.position.x, itemRect.position.y, itemRect.width, itemRect.height);
-
-                            itemDesc.Presenter.Rebind(item);
                         }
                     }
                     else
@@ -502,8 +492,6 @@ namespace Behc.Mvp.DataCollection
                         if (itemDesc.Presenter != null && (alwaysVisible || !neverVisible && _clipRectFat.Overlaps(oldRect)))
                         {
                             SetInsetAndSize(itemDesc.Presenter.RectTransform, oldRect.position.x, oldRect.position.y, oldRect.width, oldRect.height);
-
-                            itemDesc.Presenter.Rebind(item);
 
                             if (itemDesc.Presenter.IsAnimating) //force finish any spawning animation
                                 itemDesc.Presenter.AbortAnimations();
@@ -542,7 +530,6 @@ namespace Behc.Mvp.DataCollection
 
                     itemDesc = new ItemDesc
                     {
-                        Id = id,
                         Model = item,
 
                         ItemState = ItemState.WAITING_FOR_SHOW_ANIMATION_ITEM_PRESENTER,
@@ -560,7 +547,7 @@ namespace Behc.Mvp.DataCollection
 
                 _itemPresenters.Add(itemDesc);
                 _itemRects.Add(itemRect);
-                _itemIdToIndex.Add(id, index);
+                _itemIdToIndex.Add(item, index);
 
                 UpdateItem(itemDesc, alwaysVisible, neverVisible, updateWithRect);
 
@@ -643,7 +630,7 @@ namespace Behc.Mvp.DataCollection
 
             _itemRects.Clear();
             Rect rect = RectTransform.rect;
-            Vector2 initialSize = _layout.GetApproximatedContentSize(rect.size, _model.ItemsCount);
+            Vector2 initialSize = _layout.GetApproximatedContentSize(rect.size, ((IDataCollection)_model).Data.Count);
             _layout.SetContentSize(initialSize.x, initialSize.y);
 
             for (int i = 0; i < _itemPresenters.Count; i++)

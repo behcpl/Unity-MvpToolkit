@@ -4,7 +4,6 @@ namespace Behc.Mvp.Model
 {
     public interface IDataCollection
     {
-        int ItemsCount { get; }
-        IEnumerable<object> Items { get; }   
+        IReadOnlyCollection<object> Data { get; }
     }
 }

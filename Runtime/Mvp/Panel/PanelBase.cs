@@ -83,34 +83,6 @@ namespace Behc.Mvp.Panel
             _presenters.ForEach(pf => pf.Presenter.Bind(pf.ModelSelector(_model), this, prepareForAnimation));
         }
 
-        public void Rebind(object model)
-        {
-            Debug.Assert(_model != null, "Not bound!");
-            Debug.Assert(_updateKernel.UpdateLoop, "Not in kernel update loop");
-            
-#if BEHC_MVPTOOLKIT_VERBOSE
-            Debug.Log($"({name}) <color=#CC0000>Rebind</color> <<{PresenterUpdateKernel.Counter}>>");
-#endif
-
-            if (_model != model)
-            {
-                _model = (T) model;
-
-                OnUnbind();
-
-                _disposeOnUnbind.ForEach(d => d.Dispose());
-                _disposeOnUnbind.Clear();
-                
-                _presenters.ForEach(pf => pf.Presenter.Rebind(pf.ModelSelector(_model)));
-        
-                OnBind(false);
-            }
-            else
-            {
-                OnRebind();
-            }
-        }
-
         public void Unbind()
         {
             Debug.Assert(_model != null, "Not bound!");
@@ -227,7 +199,6 @@ namespace Behc.Mvp.Panel
         protected virtual void OnInitialize() { }
 
         protected virtual void OnBind(bool prepareForAnimation) { }
-        protected virtual void OnRebind() {}
         protected virtual void OnUnbind() { }
 
         //Must call onFinish as a last action
