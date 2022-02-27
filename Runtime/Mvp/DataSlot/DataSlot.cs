@@ -2,7 +2,7 @@
 
 namespace Behc.Mvp.DataSlot
 {
-    public class DataSlot : ReactiveModel
+    public class DataSlot : ReactiveModel, IDataSlot
     {
         private object _data;
 

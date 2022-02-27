@@ -80,7 +80,7 @@ namespace Behc.Mvp.DataSlot
             base.Deactivate();
         }
 
-        public override void ScheduledUpdate()
+        protected override void OnScheduledUpdate()
         {
             if (_updateCallback != null)
             {

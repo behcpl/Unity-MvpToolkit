@@ -4,7 +4,6 @@ using Behc.MiniTween.Extensions;
 using Behc.Mvp.Presenter;
 using Behc.Mvp.Utils;
 using Behc.Utils;
-// using DG.Tweening;
 using UnityEngine;
 
 namespace Behc.Mvp.DataSlot

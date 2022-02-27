@@ -28,6 +28,7 @@ namespace Behc.Mvp.Presenter
         protected T _model;
         protected bool _contentChanged;
         protected Action _updateCallback;
+        protected bool _scheduledUpdate;
 
         protected readonly List<IDisposable> _disposeOnUnbind = new List<IDisposable>();
 
@@ -146,7 +147,14 @@ namespace Behc.Mvp.Presenter
             IsActive = false;
         }
 
-        public virtual void ScheduledUpdate() { }
+        public void ScheduledUpdate()
+        {
+            _scheduledUpdate = true;
+            OnScheduledUpdate();
+            _scheduledUpdate = false;
+        }
+        
+        protected virtual void OnScheduledUpdate() {}
 
         protected void DisposeOnUnbind(IDisposable disposable)
         {
@@ -155,7 +163,7 @@ namespace Behc.Mvp.Presenter
 
         protected void CallOnKernelUpdate(Action updateCallback)
         {
-            if (_updateKernel.UpdateLoop)
+            if (_scheduledUpdate)
             {
                 updateCallback?.Invoke();
                 return;

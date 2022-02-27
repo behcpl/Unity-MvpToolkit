@@ -36,7 +36,7 @@ namespace Behc.Mvp.ToolTipManager
         //TODO: keep outside exclusion rect
         //TODO: snap to source rect option?
 
-        public override void ScheduledUpdate()
+        protected override void OnScheduledUpdate()
         {
             if (!_contentChanged || _toolTipModel == _model.CurrentToolTip)
                 return;

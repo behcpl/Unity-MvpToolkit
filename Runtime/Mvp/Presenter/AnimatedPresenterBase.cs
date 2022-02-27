@@ -208,7 +208,7 @@ namespace Behc.Mvp.Presenter
             base.Deactivate();
         }
 
-        public override void ScheduledUpdate()
+        protected override void OnScheduledUpdate()
         {
             if (_contentChanged)
             {

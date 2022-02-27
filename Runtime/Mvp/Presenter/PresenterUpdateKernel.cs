@@ -106,19 +106,21 @@ namespace Behc.Mvp.Presenter
 
         private void UpdateItem(PresenterItem item)
         {
-            if (item.RequestedUpdate)
+            bool updateSelf = item.RequestedUpdate;
+            bool updateChildren = item.ChildRequestedUpdate;
+            item.RequestedUpdate = false;
+            item.ChildRequestedUpdate = false;
+        
+            if (updateSelf)
                 item.Presenter.ScheduledUpdate();
 
-            if (item.ChildRequestedUpdate && item.Children != null)
+            if (updateChildren && item.Children != null)
             {
                 foreach (PresenterItem child in item.Children)
                 {
                     UpdateItem(child);
                 }
             }
-
-            item.RequestedUpdate = false;
-            item.ChildRequestedUpdate = false;
         }
     }
 }

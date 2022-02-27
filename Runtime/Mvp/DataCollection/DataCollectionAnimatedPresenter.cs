@@ -138,7 +138,7 @@ namespace Behc.Mvp.DataCollection
         public override void Unbind()
         {
             AbortAnimations();
-            
+
             foreach (ItemDesc itemDesc in _removedItems)
             {
                 if (itemDesc.Presenter == null)
@@ -198,6 +198,7 @@ namespace Behc.Mvp.DataCollection
 
             _state = State.ANIMATE_HIDE;
             _onAnimateHideCompleted = onFinish;
+            RequestUpdate();
 
             float delay = 0;
             for (int i = 0; i < _itemPresenters.Count; i++)
@@ -206,7 +207,7 @@ namespace Behc.Mvp.DataCollection
                 if (itemDesc.Presenter != null && itemDesc.Presenter.IsAnimating)
                     itemDesc.Presenter.AbortAnimations();
 
-                itemDesc.ItemState = ItemState.WAITING_FOR_HIDE_ANIMATION_ITEM_PRESENTER;
+                itemDesc.ItemState = itemDesc.AnimatingShow && itemDesc.Presenter == null ? ItemState.WAITING_FOR_DESPAWN : ItemState.WAITING_FOR_HIDE_ANIMATION_ITEM_PRESENTER;
                 itemDesc.Timer = 0;
                 itemDesc.Delay = delay;
                 itemDesc.Duration = _animationOptions.HideDuration;
@@ -316,7 +317,7 @@ namespace Behc.Mvp.DataCollection
             base.Deactivate();
         }
 
-        public override void ScheduledUpdate()
+        protected override void OnScheduledUpdate()
         {
             // Debug.Log($"ScheduledUpdate CC:{_contentChanged} W:{_widthChanged} H:{_heightChanged} VIS:{_visibilityChanged} <<{TestCounter.Counter}>>");
 
@@ -926,20 +927,21 @@ namespace Behc.Mvp.DataCollection
 
         private void OnDrawGizmosSelected()
         {
-            Rect rtRect = RectTransform.rect;
-            DrawRect(Color.cyan, RectTransform, new Rect(0, 0, rtRect.width, rtRect.height));
+            RectTransform rt = (RectTransform)transform;
+            Rect rtRect = rt.rect;
+            DrawRect(Color.cyan, rt, new Rect(0, 0, rtRect.width, rtRect.height));
 
-            DrawRect(Color.magenta, RectTransform, _clipRect);
-            DrawRect(new Color(0.5f, 0, 0.5f), RectTransform, _clipRectFat);
+            DrawRect(Color.magenta, rt, _clipRect);
+            DrawRect(new Color(0.5f, 0, 0.5f), rt, _clipRectFat);
 
             foreach (Rect rect in _itemRects)
             {
                 if (_clipRect.Overlaps(rect))
-                    DrawRect(Color.green, RectTransform, rect);
+                    DrawRect(Color.green, rt, rect);
                 else if (_clipRectFat.Overlaps(rect))
-                    DrawRect(Color.yellow, RectTransform, rect);
+                    DrawRect(Color.yellow, rt, rect);
                 else
-                    DrawRect(Color.red, RectTransform, rect);
+                    DrawRect(Color.red, rt, rect);
             }
         }
 

@@ -121,7 +121,7 @@ namespace Behc.Mvp.DataCollection
             base.Deactivate();
         }
 
-        public override void ScheduledUpdate()
+        protected override void OnScheduledUpdate()
         {
             if (_contentChanged)
             {
@@ -429,20 +429,21 @@ namespace Behc.Mvp.DataCollection
 
         private void OnDrawGizmosSelected()
         {
-            Rect rtRect = RectTransform.rect;
-            DrawRect(Color.cyan, RectTransform, new Rect(0, 0, rtRect.width, rtRect.height));
+            RectTransform rt = (RectTransform)transform;
+            Rect rtRect = rt.rect;
+            DrawRect(Color.cyan, rt, new Rect(0, 0, rtRect.width, rtRect.height));
 
-            DrawRect(Color.magenta, RectTransform, _clipRect);
-            DrawRect(new Color(0.5f, 0, 0.5f), RectTransform, _clipRectFat);
+            DrawRect(Color.magenta, rt, _clipRect);
+            DrawRect(new Color(0.5f, 0, 0.5f), rt, _clipRectFat);
 
             foreach (Rect rect in _itemRects)
             {
                 if (_clipRect.Overlaps(rect))
-                    DrawRect(Color.green, RectTransform, rect);
+                    DrawRect(Color.green, rt, rect);
                 else if (_clipRectFat.Overlaps(rect))
-                    DrawRect(Color.yellow, RectTransform, rect);
+                    DrawRect(Color.yellow, rt, rect);
                 else
-                    DrawRect(Color.red, RectTransform, rect);
+                    DrawRect(Color.red, rt, rect);
             }
         }
 

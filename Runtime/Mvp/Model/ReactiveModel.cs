@@ -14,7 +14,7 @@ namespace Behc.Mvp.Model
             return new GenericDisposable(() => _onChange -= action);
         }
 
-        public void NotifyChanges()
+        protected void NotifyChanges()
         {
             _onChange?.Invoke();
         }

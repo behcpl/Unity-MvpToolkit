@@ -42,7 +42,7 @@ namespace Behc.Mvp.ToastManager
 
         private readonly List<ToastItem> _activeToasts = new List<ToastItem>(16);
 
-        public override void ScheduledUpdate()
+        protected override void OnScheduledUpdate()
         {
             if (_contentChanged)
             {
