@@ -1,8 +1,7 @@
 ﻿namespace Behc.Mvp.DataStack
 {
-    public interface IPresenterStackOptions
+    public interface ICloseOptions
     {
-        bool UseCurtain { get; }
         bool CanDefaultClose { get; }
     }
 }

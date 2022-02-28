@@ -1,6 +1,4 @@
-﻿using Behc.Mvp;
-
-namespace Behc.Configuration
+﻿namespace Behc.Configuration
 {
     public interface ISceneConfigurator<in TContext>
     {

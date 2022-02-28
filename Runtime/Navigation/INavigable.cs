@@ -2,9 +2,9 @@
 {
     public interface INavigable
     {
-        void StartUp(object context);
-        void Reset(object context);
-        void TearDown();
+        void StartUp(object context, string fromName);
+
+        object ValidateContext(object context);
         object ResolveContext(string parameters);
     }
 }

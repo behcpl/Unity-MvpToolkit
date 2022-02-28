@@ -2,8 +2,6 @@
 using Behc.Mvp.Utils;
 using Behc.Utils;
 
-// ReSharper disable SuspiciousTypeConversion.Global
-
 namespace Behc.Mvp.DataStack
 {
     public class DataStackPresenter : AnimatedPresenterBase<DataStack>
@@ -101,14 +99,7 @@ namespace Behc.Mvp.DataStack
 
         private void CurtainClicked()
         {
-            if (_items.Count == 0)
-                return;
-
-            ItemDesc topLevel = _items[_items.Count - 1];
-            if (topLevel.Presenter is IPresenterStackOptions { CanDefaultClose: false })
-                return;
-
-            _model.Remove(topLevel.Model);
+            _model.TryRemoveTopLevel();
         }
     }
 }

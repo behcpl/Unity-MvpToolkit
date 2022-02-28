@@ -14,6 +14,7 @@ namespace Behc.Mvp.DataStack
             public object Model;
             public Action<object> OnClose;
             public object DefaultResultValue;
+            public bool CanDefaultClose;
         }
 
         private class Collection : IReadOnlyCollection<object>
@@ -44,7 +45,7 @@ namespace Behc.Mvp.DataStack
             _collection = new Collection(_stack);
         }
 
-        public void Push<TResult>(object model, Action<TResult> onClose, TResult defaultResult = default)
+        public void Push<TResult>(object model, Action<TResult> onClose, TResult defaultResult = default, bool canDefaultClose = true)
         {
 #if DEBUG
             Assert.IsNotNull(model);
@@ -52,7 +53,7 @@ namespace Behc.Mvp.DataStack
                 Assert.IsFalse(item.Model == model, $"Model {model} already on stack!");
 #endif
             void OnClose(object result) => onClose?.Invoke((TResult)result);
-            _stack.Add(new ItemType { Model = model, OnClose = OnClose, DefaultResultValue = defaultResult });
+            _stack.Add(new ItemType { Model = model, OnClose = OnClose, DefaultResultValue = defaultResult, CanDefaultClose = canDefaultClose });
             NotifyChanges();
         }
 
@@ -98,6 +99,23 @@ namespace Behc.Mvp.DataStack
             }
 
             NotifyChanges();
+        }
+
+        public bool TryRemoveTopLevel()
+        {
+            if (_stack.Count == 0)
+                return false;
+
+            ItemType item = _stack[_stack.Count - 1];
+            bool canDefaultClose = (item.Model as ICloseOptions)?.CanDefaultClose ?? true;
+            if (canDefaultClose && item.CanDefaultClose)
+            {
+                _stack.RemoveAt(_stack.Count - 1);
+                item.OnClose(item.DefaultResultValue);
+                NotifyChanges();
+            }
+
+            return true;
         }
     }
 }
