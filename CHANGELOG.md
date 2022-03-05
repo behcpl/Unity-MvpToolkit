@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2022-03-05
+### Bugfixes
+- DataCollectionAnimatedPresenter fixes:
+  - fixed OnDrawGizmosSelected exception while not in play mode
+  - fixed exceptions when aborting show/hide animations
+  - fixed onFinish never called when collection was empty
+### Breaking Changes
+- Replaced UndoStack with NavigationManager
+- Removed mandatory 'Id' from DataCollection items
+  - now the reference alone determines if item is the same
+  - no need for Rebind anymore
+- Removed NotifyChanges from IReactive
+- Moved stack options from presenter to model
+### Changes
+- DataSlot(...)Presenter family no longer requires concrete model class
+- DataCollection(...)Presenter family no longer requires model derived from specific abtract class
+### Added
+- Blocking support, some presenter might be blocked from activation or block others
+- BackButtonManager for better control
+- DisposableExtensions
+- IDataSlot for any compatible DataSlot models
+
 ## [0.6.2] - 2021-06-06
 ### Bugfixes
 - Fixed ButtonEx initial state
