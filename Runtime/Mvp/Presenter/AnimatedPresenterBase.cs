@@ -10,7 +10,7 @@ using Behc.Utils;
 
 namespace Behc.Mvp.Presenter
 {
-    public class AnimatedPresenterBase<T> : DataPresenterBase<T> where T : class, IReactive, IDataCollection
+    public class AnimatedPresenterBase<T> : DataPresenterBase<T>, IBlocker where T : class, IReactive, IDataCollection
     {
         protected enum ItemState
         {
@@ -27,6 +27,8 @@ namespace Behc.Mvp.Presenter
             public ItemState State;
             public bool Active;
         }
+    
+        public event Action<bool, object> OnBlockingStatusChange;
 
         public override bool IsAnimating => _animating;
 
@@ -39,6 +41,7 @@ namespace Behc.Mvp.Presenter
         protected readonly List<ItemDesc> _hidingItems = new List<ItemDesc>();
         protected int _layerId = 0;
         protected bool _animating;
+        private bool _blocking;
 
         public override void Bind(object model, IPresenter parent, bool prepareForAnimation)
         {
@@ -48,6 +51,12 @@ namespace Behc.Mvp.Presenter
             if (canvas.IsNotNull())
                 _layerId = canvas.sortingLayerID;
 
+            if (_model.Data.Count > 0)
+            {
+                OnBlockingStatusChange?.Invoke(true, this);
+                _blocking = true;
+            }
+            
             int order = _sortingStep;
             foreach (object dataModel in _model.Data)
             {
@@ -92,7 +101,13 @@ namespace Behc.Mvp.Presenter
             }
 
             _hidingItems.Clear();
-
+            
+            if (_blocking)
+            {
+                OnBlockingStatusChange?.Invoke(false, this);
+                _blocking = false;
+            }
+            
             base.Unbind();
         }
 
@@ -178,10 +193,8 @@ namespace Behc.Mvp.Presenter
             }
         }
 
-        public override void Activate()
+        protected override void OnActivate()
         {
-            base.Activate();
-
             if (_items.Count > 0)
             {
                 ItemDesc topLevel = _items[_items.Count - 1];
@@ -193,7 +206,7 @@ namespace Behc.Mvp.Presenter
             }
         }
 
-        public override void Deactivate()
+        protected override void OnDeactivate()
         {
             if (_items.Count > 0)
             {
@@ -204,8 +217,6 @@ namespace Behc.Mvp.Presenter
                     topLevel.Active = false;
                 }
             }
-
-            base.Deactivate();
         }
 
         protected override void OnScheduledUpdate()
@@ -214,6 +225,23 @@ namespace Behc.Mvp.Presenter
             {
                 UpdateContent();
                 _contentChanged = false;
+            }
+
+            if (_blocking)
+            {
+                if (_items.Count == 0 && _hidingItems.Count == 0)
+                {
+                    OnBlockingStatusChange?.Invoke(false, this);
+                    _blocking = false;
+                }
+            }
+            else
+            {
+                if (_model.Data.Count > 0)
+                {
+                    OnBlockingStatusChange?.Invoke(true, this);
+                    _blocking = true;
+                }
             }
         }
 

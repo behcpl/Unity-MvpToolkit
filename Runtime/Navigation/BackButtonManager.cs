@@ -19,13 +19,14 @@ namespace Behc.Navigation
         [MustUseReturnValue]
         public IDisposable RegisterHandler(Func<bool> handler, int priority)
         {
-            int insertAt = 0;
+            int insertAt = _handlers.Count;
             for (int i = 0; i < _handlers.Count; i++)
             {
                 if (_handlers[i].Priority > priority)
+                {
+                    insertAt = i;
                     break;
-
-                insertAt = i;
+                }
             }
             
             Description description = new Description { Priority = priority, Handler = handler };

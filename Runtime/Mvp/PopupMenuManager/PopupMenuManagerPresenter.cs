@@ -38,10 +38,8 @@ namespace Behc.Mvp.PopupMenuManager
             }
         }
 
-        public override void Activate()
+        protected override void OnActivate()
         {
-            base.Activate();
-
             foreach (ItemDesc desc in _items)
             {
                 if (desc.Active || desc.State != ItemState.READY)
@@ -52,7 +50,7 @@ namespace Behc.Mvp.PopupMenuManager
             }
         }
 
-        public override void Deactivate()
+        protected override void OnDeactivate()
         {
             foreach (ItemDesc desc in _items)
             {
@@ -62,8 +60,6 @@ namespace Behc.Mvp.PopupMenuManager
                 desc.Presenter.Deactivate();
                 desc.Active = true;
             }
-
-            base.Deactivate();
         }
 
         protected override void UpdateContent()

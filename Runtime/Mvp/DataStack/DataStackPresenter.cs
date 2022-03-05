@@ -25,10 +25,8 @@ namespace Behc.Mvp.DataStack
             }
         }
 
-        public override void Activate()
+        protected override void OnActivate()
         {
-            base.Activate();
-
             if (_items.Count > 0)
             {
                 ItemDesc topLevel = _items[_items.Count - 1];
@@ -40,7 +38,7 @@ namespace Behc.Mvp.DataStack
             }
         }
 
-        public override void Deactivate()
+        protected override void OnDeactivate()
         {
             if (_items.Count > 0)
             {
@@ -51,8 +49,6 @@ namespace Behc.Mvp.DataStack
                     topLevel.Active = false;
                 }
             }
-
-            base.Deactivate();
         }
 
         protected override void UpdateContent()

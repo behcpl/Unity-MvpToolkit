@@ -96,10 +96,8 @@ namespace Behc.Mvp.DataCollection
             base.Unbind();
         }
 
-        public override void Activate()
+        protected override void OnActivate()
         {
-            base.Activate();
-
             foreach (ItemDesc item in _itemPresenters)
             {
                 item.Presenter?.Activate();
@@ -107,7 +105,7 @@ namespace Behc.Mvp.DataCollection
             }
         }
 
-        public override void Deactivate()
+        protected override void OnDeactivate()
         {
             foreach (ItemDesc item in _itemPresenters)
             {
@@ -117,8 +115,6 @@ namespace Behc.Mvp.DataCollection
                     item.Active = false;
                 }
             }
-
-            base.Deactivate();
         }
 
         protected override void OnScheduledUpdate()

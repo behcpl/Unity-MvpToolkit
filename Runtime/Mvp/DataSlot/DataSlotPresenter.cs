@@ -8,8 +8,10 @@ using UnityEngine;
 
 namespace Behc.Mvp.DataSlot
 {
-    public class DataSlotPresenter : DataPresenterBase<ReactiveModel>
+    public class DataSlotPresenter : DataPresenterBase<ReactiveModel>, IBlocker
     {
+        public event Action<bool, object> OnBlockingStatusChange;
+
 #pragma warning disable CS0649
         [SerializeField] private bool _preserveChildTransform;
 #pragma warning restore CS0649
@@ -36,20 +38,16 @@ namespace Behc.Mvp.DataSlot
             base.Unbind();
         }
 
-        public override void Activate()
+        protected override void OnActivate()
         {
-            base.Activate();
-
             if (!_suppressActivation)
                 _activePresenter?.Activate();
         }
 
-        public override void Deactivate()
+        protected override void OnDeactivate()
         {
             if (!_suppressActivation)
                 _activePresenter?.Deactivate();
-
-            base.Deactivate();
         }
 
         protected override void OnScheduledUpdate()
@@ -98,6 +96,11 @@ namespace Behc.Mvp.DataSlot
                 PresenterMap.DestroyPresenter(fromModel, fromPresenter);
             }
 
+            if (fromModel == null && toModel != null)
+                OnBlockingStatusChange?.Invoke(true, this);
+            if (fromModel != null && toModel == null)
+                OnBlockingStatusChange?.Invoke(false, this);
+
             if (toPresenter != null)
             {
                 BindingHelper.Bind(toModel, toPresenter, this, false);
@@ -137,6 +140,8 @@ namespace Behc.Mvp.DataSlot
         {
             if (((IDataSlot)_model).Data != null)
             {
+                OnBlockingStatusChange?.Invoke(true, this);
+
                 _activeModel = ((IDataSlot)_model).Data;
                 _activePresenter = CreatePresenter(_activeModel);
                 BindingHelper.Bind(_activeModel, _activePresenter, this, false);
@@ -157,6 +162,8 @@ namespace Behc.Mvp.DataSlot
 
                 _activePresenter = null;
                 _activeModel = null;
+
+                OnBlockingStatusChange?.Invoke(false, this);
             }
         }
     }

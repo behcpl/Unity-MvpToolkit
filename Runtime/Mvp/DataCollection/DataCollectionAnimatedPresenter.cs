@@ -254,6 +254,13 @@ namespace Behc.Mvp.DataCollection
 
         public override void AbortAnimations()
         {
+
+            Action showComplete = _onAnimateShowCompleted;
+            _onAnimateShowCompleted = null;
+            
+            Action hideCompleted = _onAnimateHideCompleted;
+            _onAnimateHideCompleted = null;
+            
             foreach (ItemDesc itemDesc in _removedItems)
             {
                 if (itemDesc.Presenter == null)
@@ -282,17 +289,12 @@ namespace Behc.Mvp.DataCollection
                 itemDesc.Timer = itemDesc.Delay + itemDesc.Duration;
             }
 
-            _onAnimateShowCompleted?.Invoke();
-            _onAnimateShowCompleted = null;
-
-            _onAnimateHideCompleted?.Invoke();
-            _onAnimateHideCompleted = null;
+            showComplete?.Invoke();
+            hideCompleted?.Invoke();
         }
 
-        public override void Activate()
+        protected override void OnActivate()
         {
-            base.Activate();
-
             foreach (ItemDesc item in _itemPresenters)
             {
                 if (item.ItemState == ItemState.READY && item.Presenter != null)
@@ -303,7 +305,7 @@ namespace Behc.Mvp.DataCollection
             }
         }
 
-        public override void Deactivate()
+        protected override void OnDeactivate()
         {
             foreach (ItemDesc item in _itemPresenters)
             {
@@ -313,8 +315,6 @@ namespace Behc.Mvp.DataCollection
                     item.Active = false;
                 }
             }
-
-            base.Deactivate();
         }
 
         protected override void OnScheduledUpdate()

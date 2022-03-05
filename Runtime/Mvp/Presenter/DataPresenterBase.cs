@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Behc.Mvp.Model;
+using Behc.Mvp.Utils;
 using Behc.Utils;
 using UnityEngine;
 
@@ -10,7 +11,8 @@ namespace Behc.Mvp.Presenter
 {
     public class DataPresenterBase<T> : MonoBehaviour, IPresenter where T : class, IReactive
     {
-        public bool IsActive { get; protected set; } = false;
+        public bool IsActive => _activeSelf && _blockers.Count == 0;
+
         public virtual bool IsAnimating { get; } = false;
 
         public PresenterMap PresenterMap => _presenterMap;
@@ -35,6 +37,8 @@ namespace Behc.Mvp.Presenter
         private RectTransform _rectTransform;
         private PresenterUpdateKernel _updateKernel;
         private PresenterMap _presenterMap;
+        private SmallSet _blockers;
+        private bool _activeSelf;
 
         public virtual void Initialize(PresenterMap presenterMap, PresenterUpdateKernel kernel)
         {
@@ -64,7 +68,7 @@ namespace Behc.Mvp.Presenter
 
             gameObject.SetActive(true);
 
-            _model = (T) model;
+            _model = (T)model;
             _updateKernel.RegisterPresenter(this, parent);
 
             DisposeOnUnbind(_model.Subscribe(ModelChanged));
@@ -78,7 +82,7 @@ namespace Behc.Mvp.Presenter
 #if BEHC_MVPTOOLKIT_VERBOSE
             Debug.Log($"({name}) <color=#800000>Unbind</color> <<{PresenterUpdateKernel.Counter}>>");
 #endif
-           
+
             if (IsAnimating)
                 AbortAnimations();
 
@@ -104,24 +108,32 @@ namespace Behc.Mvp.Presenter
 
         public virtual void AbortAnimations() { }
 
-        public virtual void Activate()
+        public void Activate()
         {
 #if BEHC_MVPTOOLKIT_VERBOSE
             Debug.Log($"({name}) <color=#00ff00>Activate</color> <<{PresenterUpdateKernel.Counter}>>");
 #endif
+            bool wasActive = IsActive;
 
-            Debug.Assert(!IsActive, "Already activated!");
-            IsActive = true;
+            Debug.Assert(!_activeSelf, "Already activated!");
+            _activeSelf = true;
+
+            if (!wasActive)
+                OnActivate();
         }
 
-        public virtual void Deactivate()
+        public void Deactivate()
         {
 #if BEHC_MVPTOOLKIT_VERBOSE
             Debug.Log($"({name}) <color=#008000>Deactivate</color> <<{PresenterUpdateKernel.Counter}>>");
 #endif
+            bool wasActive = IsActive;
 
-            Debug.Assert(IsActive, "Not activated!");
-            IsActive = false;
+            Debug.Assert(_activeSelf, "Not activated!");
+            _activeSelf = false;
+            
+            if(wasActive)
+                OnDeactivate();
         }
 
         public void ScheduledUpdate()
@@ -130,8 +142,27 @@ namespace Behc.Mvp.Presenter
             OnScheduledUpdate();
             _scheduledUpdate = false;
         }
-        
-        protected virtual void OnScheduledUpdate() {}
+
+        public void SetBlockedStatus(bool blocked, object source)
+        {
+            bool wasActive = IsActive;
+            if (blocked)
+                _blockers.Add(source);
+            else
+                _blockers.Remove(source);
+
+            bool active = IsActive;
+            if(wasActive && !active)
+                OnDeactivate();
+            if(!wasActive && active)
+                OnActivate();
+        }
+
+        protected virtual void OnScheduledUpdate() { }
+
+        protected virtual void OnActivate() { }
+
+        protected virtual void OnDeactivate() { }
 
         protected void DisposeOnUnbind(IDisposable disposable)
         {
@@ -157,6 +188,8 @@ namespace Behc.Mvp.Presenter
 
         protected void ExecuteUpdateCallback()
         {
+            Debug.Log($"base ExecuteUpdateCallback cb:{_updateCallback}"); 
+
             _updateCallback?.Invoke();
             _updateCallback = null;
         }
