@@ -1,9 +1,11 @@
 {
     "name": "behc.MvpToolkit",
-    "rootNamespace": "",
+    "rootNamespace": "Behc",
     "references": [
         "Unity.InputSystem",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.ResourceManager",
+        "Unity.Addressables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -22,6 +24,11 @@
             "name": "com.unity.textmeshpro",
             "expression": "1.0.0",
             "define": "BEHC_MVPTOOLKIT_TEXTMESHPRO"
+        },
+        {
+            "name": "com.unity.addressables",
+            "expression": "",
+            "define": "BEHC_MVPTOOLKIT_ADDRESSABLES"
         }
     ],
     "noEngineReferences": false

@@ -1,5 +1,6 @@
 ﻿using System;
 using Behc.Utils;
+using JetBrains.Annotations;
 
 namespace Behc.Mvp.Model
 {
@@ -7,6 +8,7 @@ namespace Behc.Mvp.Model
     {
         private event Action _onChange;
    
+        [MustUseReturnValue]
         public IDisposable Subscribe(Action action)
         {
             _onChange += action;

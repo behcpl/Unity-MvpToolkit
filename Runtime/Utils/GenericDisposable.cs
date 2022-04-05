@@ -5,6 +5,8 @@ namespace Behc.Utils
 {
     public class GenericDisposable : IDisposable
     {
+        public static GenericDisposable Noop = new GenericDisposable(null);
+        
         private readonly Action _disposeAction;
 
         public GenericDisposable(Action disposeAction)

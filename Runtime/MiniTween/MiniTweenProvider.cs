@@ -1,4 +1,5 @@
-﻿using Behc.Utils;
+﻿using System;
+using Behc.Utils;
 using UnityEngine;
 
 namespace Behc.MiniTween
@@ -8,8 +9,8 @@ namespace Behc.MiniTween
     {
         public bool UnscaledTime;
 
-        private MiniTweenKernel _kernel;
-        
+        [NonSerialized] private MiniTweenKernel _kernel;
+
         public override ITweenSystem GetTweenSystem()
         {
             if (_kernel.IsNull())
@@ -22,7 +23,7 @@ namespace Behc.MiniTween
                 _kernel.Initialize(this);
                 DontDestroyOnLoad(go);
             }
-            
+
             return _kernel;
         }
     }
