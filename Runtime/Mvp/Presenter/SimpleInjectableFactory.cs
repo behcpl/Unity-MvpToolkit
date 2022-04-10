@@ -1,9 +1,8 @@
-﻿using Behc.Mvp.Presenter;
-using UnityEngine;
+﻿using UnityEngine;
 
 // ReSharper disable SuspiciousTypeConversion.Global
 
-namespace Behc.MiniDi
+namespace Behc.Mvp.Presenter
 {
     public abstract class SimpleInjectableFactory : IPresenterFactory
     {

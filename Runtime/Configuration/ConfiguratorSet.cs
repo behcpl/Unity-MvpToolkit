@@ -1,37 +1,10 @@
 ﻿using System;
-using Behc.MiniDi;
 using Behc.Utils;
 
 namespace Behc.Configuration
 {
     public class ConfiguratorSet : ITickable
     {
-        public float Progress
-        {
-            get
-            {
-                //TODO: make more correct
-                //TODO: add weights
-                //TODO: add downloading info?
-                if (Status == ConfiguratorStatus.LOADED || Status == ConfiguratorStatus.UNLOADED)
-                    return 1.0f;
-
-                float sum = 0;
-                foreach (IConfiguratorLoader loader in _configuratorLoaders)
-                {
-                    if (loader.Status == ConfiguratorStatus.LOADED && Status == ConfiguratorStatus.LOADING)
-                        sum += 1.0f; 
-                    
-                    if (loader.Status == ConfiguratorStatus.UNLOADED && Status == ConfiguratorStatus.UNLOADING)
-                        sum += 1.0f;
-
-                    sum += loader.Progress;
-                }
-                
-                return sum / _configuratorLoaders.Length;
-            }
-        }
-
         public ConfiguratorStatus Status { get; private set; }
 
         private readonly IConfiguratorLoader[] _configuratorLoaders;
@@ -67,6 +40,48 @@ namespace Behc.Configuration
             Status = ConfiguratorStatus.UNLOADING;
             _onComplete = onComplete;
             _tickerManager.Track(this);
+        }
+
+        public float GetLoadingProgress()
+        {
+            //TODO: add weights?
+
+            float sum = 0;
+            foreach (IConfiguratorLoader loader in _configuratorLoaders)
+            {
+                switch (loader.Status)
+                {
+                    case ConfiguratorStatus.LOADED:
+                        sum += 1.0f;
+                        break;
+                    case ConfiguratorStatus.LOADING:
+                        sum += loader.Progress;
+                        break;
+                }
+            }
+
+            return sum / _configuratorLoaders.Length;
+        }
+
+        public float GetUnloadingProgress()
+        {
+            //TODO: add weights?
+
+            float sum = 0;
+            foreach (IConfiguratorLoader loader in _configuratorLoaders)
+            {
+                switch (loader.Status)
+                {
+                    case ConfiguratorStatus.UNLOADED:
+                        sum += 1.0f;
+                        break;
+                    case ConfiguratorStatus.UNLOADING:
+                        sum += loader.Progress;
+                        break;
+                }
+            }
+
+            return sum / _configuratorLoaders.Length;
         }
 
         void ITickable.OnTick()
@@ -123,7 +138,7 @@ namespace Behc.Configuration
         }
     }
 
-    public class ConfiguratorSetFactory : IFactory<ConfiguratorSet, IConfiguratorLoader[]>
+    public class ConfiguratorSetFactory : IFactory<IConfiguratorLoader[], ConfiguratorSet>
     {
         private readonly IDependencyResolver _dependencyResolver;
         private readonly TickerManager _tickerManager;

@@ -1,4 +1,4 @@
-﻿namespace Behc.MiniDi
+﻿namespace Behc.Configuration
 {
     public interface IDependencyResolver
     {

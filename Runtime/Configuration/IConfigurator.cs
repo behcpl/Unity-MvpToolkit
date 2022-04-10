@@ -1,6 +1,4 @@
-﻿using Behc.MiniDi;
-
-namespace Behc.Configuration
+﻿namespace Behc.Configuration
 {
     public interface IConfigurator
     {

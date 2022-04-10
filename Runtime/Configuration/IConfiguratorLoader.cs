@@ -1,5 +1,4 @@
 ﻿using System;
-using Behc.MiniDi;
 
 namespace Behc.Configuration
 {

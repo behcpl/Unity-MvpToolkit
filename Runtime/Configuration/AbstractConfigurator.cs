@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Behc.MiniDi;
 using JetBrains.Annotations;
 
 namespace Behc.Configuration

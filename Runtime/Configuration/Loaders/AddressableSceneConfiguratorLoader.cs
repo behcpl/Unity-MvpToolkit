@@ -1,6 +1,5 @@
 ﻿#if BEHC_MVPTOOLKIT_ADDRESSABLES
 using System;
-using Behc.MiniDi;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;

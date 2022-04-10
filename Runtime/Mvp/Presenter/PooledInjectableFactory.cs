@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using Behc.Mvp.Presenter;
 using UnityEngine;
 
 // ReSharper disable SuspiciousTypeConversion.Global
 
-namespace Behc.MiniDi
+namespace Behc.Mvp.Presenter
 {
     public abstract class PooledInjectableFactory : IPresenterFactory
     {
