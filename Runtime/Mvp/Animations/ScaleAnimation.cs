@@ -37,7 +37,7 @@ namespace Behc.Mvp.Animations
                 return;
             }
 
-            ITweenSystem tweenSystem = _options.TweenProvider.GetTweenSystem();
+            ITweenSystem tweenSystem = _options.TweenProvider.GetInstance();
             _tweenFade = _canvasGroup.AnimateAlpha(tweenSystem, 1, _options.ShowDuration);
             _tweenScale = _transform.AnimateScale(tweenSystem, Vector3.one, _options.ShowDuration);
             _tweenScale.SetEase(_options.ShowScaleCurve);
@@ -61,7 +61,7 @@ namespace Behc.Mvp.Animations
                 return;
             }
 
-            ITweenSystem tweenSystem = _options.TweenProvider.GetTweenSystem();
+            ITweenSystem tweenSystem = _options.TweenProvider.GetInstance();
             _tweenFade = _canvasGroup.AnimateAlpha(tweenSystem, _options.HideAlphaEnd, _options.HideDuration);
             _tweenScale = _transform.AnimateScale(tweenSystem, new Vector3(_options.HideScaleEnd, _options.HideScaleEnd, _options.HideScaleEnd), _options.HideDuration);
             _tweenScale.SetEase(_options.HideScaleCurve);

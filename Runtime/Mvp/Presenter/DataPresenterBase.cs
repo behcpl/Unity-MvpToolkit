@@ -188,8 +188,6 @@ namespace Behc.Mvp.Presenter
 
         protected void ExecuteUpdateCallback()
         {
-            Debug.Log($"base ExecuteUpdateCallback cb:{_updateCallback}"); 
-
             _updateCallback?.Invoke();
             _updateCallback = null;
         }

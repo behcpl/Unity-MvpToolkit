@@ -13,7 +13,7 @@ namespace Behc.Mvp.DataSlot
 #pragma warning disable CS0649
         [SerializeField] private CanvasGroup _curtain;
         [SerializeField] private DataSlotCurtainPresenterOptions _options;
-        [SerializeField] private TweenProvider _tweenProvider;
+        [SerializeField] private AbstractProvider<ITweenSystem> _tweenProvider;
 #pragma warning restore CS0649
 
         private enum State
@@ -50,7 +50,7 @@ namespace Behc.Mvp.DataSlot
             AnimationCurve showCurve = null;
             AnimationCurve hideCurve = null;
 
-            ITweenSystem tweenSystem = _tweenProvider.GetTweenSystem();
+            ITweenSystem tweenSystem = _tweenProvider.GetInstance();
 
             if (_options.IsNotNull())
             {

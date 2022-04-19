@@ -1,5 +1,6 @@
 ﻿using Behc.MiniTween;
 using Behc.MiniTween.Extensions;
+using Behc.Utils;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -8,7 +9,7 @@ namespace Behc.Mvp.Components
     public class FadeCurtain : Curtain
     {
 #pragma warning disable CS0649
-        [SerializeField] private TweenProvider _tweenProvider;
+        [SerializeField] private AbstractProvider<ITweenSystem> _tweenProvider;
         [SerializeField] private CanvasGroup _mainGroup;
         [SerializeField] private Canvas _mainCanvas;
 
@@ -55,7 +56,7 @@ namespace Behc.Mvp.Components
             _mainGroup.alpha = 0;
             _mainCanvas.sortingOrder = order - 1;
 
-            _tween = _mainGroup.AnimateAlpha(_tweenProvider.GetTweenSystem(), _alpha, _fadeDuration);
+            _tween = _mainGroup.AnimateAlpha(_tweenProvider.GetInstance(), _alpha, _fadeDuration);
             _tween.SetCompleteCallback(() => _tween = null);
         }
 
@@ -76,7 +77,7 @@ namespace Behc.Mvp.Components
             _auxGroup.alpha = _alpha;
             _auxCanvas.sortingOrder = previousOrder - 1;
 
-            _tween = _auxGroup.AnimateAlpha(_tweenProvider.GetTweenSystem(), 0, _fadeDuration);
+            _tween = _auxGroup.AnimateAlpha(_tweenProvider.GetInstance(), 0, _fadeDuration);
             _tween.SetUpdateCallback(() =>
             {
                 float cs = _auxGroup.alpha;
@@ -98,7 +99,7 @@ namespace Behc.Mvp.Components
 
             Assert.IsTrue(_mainGroup.gameObject.activeSelf);
 
-            _tween = _mainGroup.AnimateAlpha(_tweenProvider.GetTweenSystem(), 0, _fadeDuration);
+            _tween = _mainGroup.AnimateAlpha(_tweenProvider.GetInstance(), 0, _fadeDuration);
             _tween.SetCompleteCallback(() =>
             {
                 _mainGroup.gameObject.SetActive(false);

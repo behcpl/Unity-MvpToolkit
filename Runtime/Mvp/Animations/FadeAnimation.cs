@@ -33,7 +33,7 @@ namespace Behc.Mvp.Animations
                 return;
             }
             
-            _tween = _canvasGroup.AnimateAlpha(_options.TweenProvider.GetTweenSystem(), 1, _options.ShowDuration);
+            _tween = _canvasGroup.AnimateAlpha(_options.TweenProvider.GetInstance(), 1, _options.ShowDuration);
             _tween.SetId($"AnimateShow-{_canvasGroup.gameObject.name}");
             _tween.SetCompleteCallback(() =>
             {
@@ -52,7 +52,7 @@ namespace Behc.Mvp.Animations
                 return;
             }
             
-            _tween = _canvasGroup.AnimateAlpha(_options.TweenProvider.GetTweenSystem(), 0, _options.HideDuration);
+            _tween = _canvasGroup.AnimateAlpha(_options.TweenProvider.GetInstance(), 0, _options.HideDuration);
             _tween.SetId($"AnimateHide-{_canvasGroup.gameObject.name}");
             _tween.SetCompleteCallback(() =>
             {

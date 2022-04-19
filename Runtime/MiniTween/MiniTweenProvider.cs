@@ -5,13 +5,13 @@ using UnityEngine;
 namespace Behc.MiniTween
 {
     [CreateAssetMenu(fileName = "MiniTweenOptions", menuName = "MvpToolkit/MiniTween", order = 500)]
-    public class MiniTweenProvider : TweenProvider
+    public class MiniTweenProvider : AbstractProvider<ITweenSystem>
     {
         public bool UnscaledTime;
 
         [NonSerialized] private MiniTweenKernel _kernel;
 
-        public override ITweenSystem GetTweenSystem()
+        public override ITweenSystem GetInstance()
         {
             if (_kernel.IsNull())
             {

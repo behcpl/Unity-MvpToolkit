@@ -16,7 +16,7 @@ namespace Behc.Mvp.DataSlot
         //- sort old/new by some key/score
 #pragma warning disable CS0649
         [SerializeField] private DataSlotSlidePresenterOptions _options;
-        [SerializeField] private TweenProvider _tweenProvider;
+        [SerializeField] private AbstractProvider<ITweenSystem> _tweenProvider;
 #pragma warning restore CS0649
 
         private enum State
@@ -122,7 +122,7 @@ namespace Behc.Mvp.DataSlot
                 }
                 else
                 {
-                    ITweenSystem tweenSystem = _tweenProvider.GetTweenSystem();
+                    ITweenSystem tweenSystem = _tweenProvider.GetInstance();
                     if (fromPresenter != null)
                     {
                         ITween tween = fromPresenter.RectTransform.AnimateAnchoredPosition(tweenSystem, moveOldTo, duration);
