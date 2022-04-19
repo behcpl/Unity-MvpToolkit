@@ -8,20 +8,30 @@ namespace Behc.Navigation
 {
     public class NavigationRegistry : INavigationRegistry
     {
-        private readonly Dictionary<string, INavigable> _navigables = new Dictionary<string, INavigable>();
+        private readonly Dictionary<string, IFactory<object, INavigable>> _factories;
 
-        [MustUseReturnValue]
-        public IDisposable Register(string name, INavigable navigable)
+        public NavigationRegistry()
         {
-            Debug.LogWarning($"Register: {name}");
-            _navigables.Add(name, navigable);
-
-            return new GenericDisposable(() => _navigables.Remove(name));
+            _factories = new Dictionary<string, IFactory<object, INavigable>>();
         }
 
-        public INavigable Get(string name)
+        [MustUseReturnValue]
+        public IDisposable Register(string name, IFactory<object, INavigable> navigableFactory)
         {
-            return _navigables[name];
+            _factories.Add(name, navigableFactory);
+
+            return new GenericDisposable(() => _factories.Remove(name));
+        }
+
+        public INavigable Create(string name, object parameters)
+        {
+            if (_factories.TryGetValue(name, out IFactory<object, INavigable> factory))
+            {
+                return factory.Create(parameters);
+            }
+            
+            Debug.Assert(false, $"Factory for '{name}' not found!");
+            return null;
         }
     }
 }

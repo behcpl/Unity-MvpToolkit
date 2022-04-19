@@ -4,90 +4,67 @@ using JetBrains.Annotations;
 
 namespace Behc.Navigation
 {
-    public abstract class NavigationBase : INavigable
+    public abstract class NavigableBase : INavigable
     {
-        public abstract void StartUp(object parameters, out object context);
+        private List<IDisposable> _stopDisposables;
+        private List<IDisposable> _disposables;
 
-        public abstract void Resume(object parameters, object context);
+        protected virtual void OnStart() { }
 
-        public virtual void UpdateParameters(object parameters, object context) { }
+        protected virtual void OnRestart(object parameters) { }
 
-        public virtual void Pause(object context) { }
+        protected virtual void OnStop() { }
 
-        public virtual void TearDown(object context, Action onComplete)
-        {
-            onComplete?.Invoke();
-        }
-    }
-
-    public abstract class NavigationBase2 : INavigable
-    {
-        private List<IDisposable> _pauseDisposables;
-        private List<IDisposable> _tearDownDisposables;
-
-        protected abstract object CreateContext(object parameters);
-
-        protected virtual void OnResume(object parameters, object context) { }
-        
-        protected virtual void OnUpdateParameters(object parameters, object context) { }
-        
-        protected virtual void OnPause(object context) { }
-
-        protected virtual void OnTearDown(object context, Action onComplete)
+        protected virtual void OnDispose(Action onComplete)
         {
             onComplete?.Invoke();
         }
 
-        protected void DisposeOnPause([NotNull] IDisposable disposable)
+        protected void DisposeOnStop([NotNull] IDisposable disposable)
         {
-            _pauseDisposables ??= new List<IDisposable>();
-            _pauseDisposables.Add(disposable);
+            _stopDisposables ??= new List<IDisposable>();
+            _stopDisposables.Add(disposable);
         }
 
-        protected void DisposeOnTearDown([NotNull] IDisposable disposable)
+        protected void AutoDispose([NotNull] IDisposable disposable)
         {
-            _tearDownDisposables ??= new List<IDisposable>();
-            _tearDownDisposables.Add(disposable);
+            _disposables ??= new List<IDisposable>();
+            _disposables.Add(disposable);
         }
 
-        void INavigable.StartUp(object parameters, out object context)
+        void INavigable.Start()
         {
-            context = CreateContext(parameters);
+            OnStart();
         }
 
-        void INavigable.Resume(object parameters, object context)
+        void INavigable.Restart(object parameters)
         {
-            OnResume(parameters, context);
+            OnRestart(parameters);
         }
-        
-        void INavigable.UpdateParameters(object parameters, object context)
-        {
-            OnUpdateParameters(parameters, context);
-        }
-        
-        void INavigable.Pause(object context)
-        {
-            OnPause(context);
 
-            if (_pauseDisposables != null)
+        void INavigable.Stop()
+        {
+            OnStop();
+
+            if (_stopDisposables != null)
             {
-                foreach (IDisposable disposable in _pauseDisposables)
+                foreach (IDisposable disposable in _stopDisposables)
                     disposable.Dispose();
-                _pauseDisposables.Clear();
+                _stopDisposables.Clear();
             }
         }
 
-        void INavigable.TearDown(object context, Action onComplete)
+        void INavigable.LongDispose(Action onComplete)
         {
-            OnTearDown(context, Complete);
+            OnDispose(Complete);
 
             void Complete()
             {
-                if (_tearDownDisposables != null)
+                if (_disposables != null)
                 {
-                    foreach (IDisposable disposable in _tearDownDisposables)
+                    foreach (IDisposable disposable in _disposables)
                         disposable.Dispose();
-                    _tearDownDisposables.Clear();
+                    _disposables.Clear();
                 }
 
                 onComplete?.Invoke();

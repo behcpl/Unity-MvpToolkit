@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Behc.Utils;
 using JetBrains.Annotations;
-using UnityEngine;
 
 namespace Behc.Navigation
 {
@@ -18,36 +18,38 @@ namespace Behc.Navigation
     {
         private struct NavigationPoint
         {
+            public string Name;
             public INavigable Navigable;
-            public object Context;
         }
 
+        private readonly IFactory<string, object, INavigable> _navigableFactory;
         private readonly List<NavigationPoint> _stack;
 
         private bool _goBack;
-        private INavigable _next;
+        private string _next;
         private NavigationOptions _nextOptions;
         private object _nextParameters;
         private int _disposingInProgress;
         private Action _continuation;
 
-        public NavigationManager()
+        public NavigationManager(IFactory<string, object, INavigable> navigableFactory)
         {
+            _navigableFactory = navigableFactory;
             _stack = new List<NavigationPoint>(16);
             _disposingInProgress = -1;
         }
 
-        public void NavigateTo([NotNull] INavigable navigable, [CanBeNull] object parameters, NavigationOptions options)
+        public void NavigateTo([NotNull] string name, [CanBeNull] object parameters, NavigationOptions options)
         {
             ResetDeferredActions();
-            _next = navigable;
+            _next = name;
             _nextOptions = options;
             _nextParameters = parameters;
         }
 
         public bool NavigateBack()
         {
-            if (_stack.Count <= 0)
+            if (_stack.Count <= 1)
                 return false;
 
             ResetDeferredActions();
@@ -80,7 +82,7 @@ namespace Behc.Navigation
                 bool resetHistory = (_nextOptions & NavigationOptions.RESET_HISTORY) != 0;
                 bool dontReuseContext = (_nextOptions & NavigationOptions.DONT_REUSE_CONTEXT) != 0;
 
-                INavigable next = _next;
+                string next = _next;
                 object parameters = _nextParameters;
 
                 ResetDeferredActions();
@@ -109,12 +111,12 @@ namespace Behc.Navigation
             }
 
             NavigationPoint point = _stack[_stack.Count - 1];
-            point.Navigable.Pause(point.Context);
+            point.Navigable.Stop();
 
-            if (IsLastInstance(point.Context))
+            if (IsLastInstance(point.Navigable))
             {
                 _disposingInProgress = _stack.Count - 1;
-                point.Navigable.TearDown(point.Context, () =>
+                point.Navigable.LongDispose(() =>
                 {
                     _stack.RemoveAt(_disposingInProgress);
                     _disposingInProgress = -1;
@@ -135,34 +137,31 @@ namespace Behc.Navigation
                 if (_disposingInProgress >= 0)
                     return;
 
-                lastPoint.Navigable?.Resume(null, lastPoint.Context);
+                lastPoint.Navigable?.Start();
                 _continuation = null;
             }
         }
 
-        private void ProcessPushNew(INavigable navigable, object parameters, bool dontReuseContext)
+        private void ProcessPushNew(string name, object parameters, bool dontReuseContext)
         {
-            object context = null;
+            INavigable navigable = null;
             if (!dontReuseContext)
             {
-                context = GetLastContext(navigable);
+                navigable = GetLastContext(name);
             }
 
-            if (context == null)
-            {
-                navigable.StartUp(parameters, out context);
-            }
-
-            navigable.Resume(parameters, context);
-            _stack.Add(new NavigationPoint { Context = context, Navigable = navigable });
+            navigable ??= _navigableFactory.Create(name, parameters);
+            navigable.Start();
+            
+            _stack.Add(new NavigationPoint { Name = name, Navigable = navigable });
         }
 
-        private void ProcessReplaceAll(INavigable navigable, object parameters, bool dontReuseContext)
+        private void ProcessReplaceAll(string name, object parameters, bool dontReuseContext)
         {
             NavigationPoint lastPoint = _stack[_stack.Count - 1];
-            if (lastPoint.Navigable != navigable || dontReuseContext)
+            if (lastPoint.Name != name || dontReuseContext)
             {
-                lastPoint.Navigable.Pause(lastPoint.Context);
+                lastPoint.Navigable.Stop();
                 lastPoint = default;
             }
 
@@ -176,20 +175,20 @@ namespace Behc.Navigation
                 while (_stack.Count > 0)
                 {
                     NavigationPoint point = _stack[_stack.Count - 1];
-                    if (point.Context == lastPoint.Context || !IsLastInstance(lastPoint.Context))
+                    if (point.Navigable == lastPoint.Navigable || !IsLastInstance(lastPoint.Navigable))
                     {
                         _stack.RemoveAt(_stack.Count - 1);
                         continue;
                     }
 
                     _disposingInProgress = _stack.Count - 1;
-                    point.Navigable.TearDown(point.Context, () =>
+                    point.Navigable.LongDispose(() =>
                     {
                         _stack.RemoveAt(_disposingInProgress);
                         _disposingInProgress = -1;
                     });
 
-                    if (_disposingInProgress >= 0) //TODO: continue removing all elements
+                    if (_disposingInProgress >= 0)
                     {
                         _continuation = Continue;
                         return;
@@ -200,32 +199,32 @@ namespace Behc.Navigation
 
                 if (lastPoint.Navigable != null)
                 {
-                    lastPoint.Navigable.UpdateParameters(parameters, lastPoint.Context);
+                    lastPoint.Navigable.Restart(parameters);
                     _stack.Add(lastPoint);
                 }
                 else
                 {
-                    ProcessPushNew(navigable, parameters, dontReuseContext);
+                    ProcessPushNew(name, parameters, dontReuseContext);
                 }
             }
         }
 
-        private void ProcessReplaceCurrent(INavigable navigable, object parameters, bool dontReuseContext)
+        private void ProcessReplaceCurrent(string name, object parameters, bool dontReuseContext)
         {
             NavigationPoint lastPoint = _stack[_stack.Count - 1];
 
-            if (lastPoint.Navigable == navigable && !dontReuseContext)
+            if (lastPoint.Name == name && !dontReuseContext)
             {
-                lastPoint.Navigable.UpdateParameters(parameters, lastPoint.Context);
+                lastPoint.Navigable.Restart(parameters);
                 return;
             }
 
-            lastPoint.Navigable.Pause(lastPoint.Context);
+            lastPoint.Navigable.Stop();
 
-            if (IsLastInstance(lastPoint.Context))
+            if (IsLastInstance(lastPoint.Navigable))
             {
                 _disposingInProgress = _stack.Count - 1;
-                lastPoint.Navigable.TearDown(lastPoint.Context, () =>
+                lastPoint.Navigable.LongDispose(() =>
                 {
                     _stack.RemoveAt(_disposingInProgress);
                     _disposingInProgress = -1;
@@ -246,7 +245,7 @@ namespace Behc.Navigation
                 if (_disposingInProgress >= 0)
                     return;
 
-                ProcessPushNew(navigable, parameters, dontReuseContext);
+                ProcessPushNew(name, parameters, dontReuseContext);
                 _continuation = null;
             }
         }
@@ -259,23 +258,23 @@ namespace Behc.Navigation
             _nextParameters = null;
         }
 
-        private bool IsLastInstance(object context)
+        private bool IsLastInstance(INavigable navigable)
         {
             for (int i = _stack.Count - 1; i > 0; i--) //skip last element, it's the one we're testing
             {
-                if (_stack[i - 1].Context == context)
+                if (_stack[i - 1].Navigable == navigable)
                     return false;
             }
 
             return true;
         }
 
-        private object GetLastContext(INavigable navigable)
+        private INavigable GetLastContext(string name)
         {
             for (int i = _stack.Count; i > 0; i--)
             {
-                if (_stack[i - 1].Navigable == navigable)
-                    return _stack[i - 1].Context;
+                if (_stack[i - 1].Name == name)
+                    return _stack[i - 1].Navigable;
             }
 
             return null;
