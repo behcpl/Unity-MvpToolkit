@@ -186,16 +186,19 @@ namespace Behc.Mvp.Panel
 #endif
         }
 
+        // Automatically disposes an object when presenter is no longer needed.
         protected void DisposeOnUnbind(IDisposable disposable)
         {
             _disposeOnUnbind.Add(disposable);
         }
 
+        // Automatically disposes an object when presenter is destroyed.
         protected void DisposeOnDestroy(IDisposable disposable)
         {
             _disposeOnDestroy.Add(disposable);
         }
         
+        // Called only once, override to perform some initialization, i.e. RegisterPresenter
         protected virtual void OnInitialize() { }
 
         protected virtual void OnBind(bool prepareForAnimation) { }
@@ -218,12 +221,14 @@ namespace Behc.Mvp.Panel
         protected virtual void OnActivate() { }
         protected virtual void OnDeactivate() { }
 
+        // Create composite presenter from multiple presenters. modelSelector must point to valid model (that subPresenter expects)
         protected void RegisterPresenter(Func<T, object> modelSelector, IPresenter subPresenter)
         {
             subPresenter.Initialize(_presenterMap, _updateKernel);
             _presenters.Add(new PresenterField { Presenter = subPresenter, ModelSelector = modelSelector });
         }
 
+        // Call to request ScheduledUpdate from PresenterUpdateKernel
         protected void RequestUpdate()
         {
             _updateKernel.RequestUpdate(this);

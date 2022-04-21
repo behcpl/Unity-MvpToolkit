@@ -6,7 +6,7 @@ I kept the name, but it's more Minimal-Viable-Product-Toolkit now.
 
 #### Core concepts
  - Everything can be customized/expanded/replaced
- - No external dependencies (dependecies like UniRx or Zenject can be used with MvpToolkit but are not required)
+ - No external dependencies (dependencies like UniRx or Zenject can be used with MvpToolkit but are not required)
  - No globals/statics/singletons 
  
 #### Recommended for
@@ -18,7 +18,7 @@ I kept the name, but it's more Minimal-Viable-Product-Toolkit now.
 
 ## Components
 
-### Mvp
+### Mvp (Model-View-Presenter)
 
 Core component with all classes required for Mvp pattern and many helpers and generics
 to keep boilerplate code to minimum.
@@ -27,28 +27,20 @@ to keep boilerplate code to minimum.
 
 ### Configuration
 
-Optional component to standarize process of registration new elements when scene is loaded.
+Optional component to streamline process of registration new elements when game (or its part) is loaded.
 
 [Read more](./configuration.md)
 
 ### Navigation
 
-Optional component with application side naviation.
+Optional component with application side navigation.
 
 [Read more](./navigation.md)
-
-### MiniDi
-
-Very simple dependency injection container implementation.
-There is no reflection/attribute magic, you need to explicitly resolve type
-in configurator/factory and pass it to constructor (or some Inject method for monobehaviors)
-
-[Read more](./di.md)
 
 ### MiniTween
 
 Very simple tweening engine, created mostly because there is no official DOTween UPM package to depend on.
-It is used in a few parts of Mvp component, for animating transitions.
+It is used in a few parts of Mvp component for animating transitions.
 
 [Read more](./tween.md)
 

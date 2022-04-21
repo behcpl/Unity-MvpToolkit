@@ -45,6 +45,7 @@ namespace Behc.Mvp.Model
             }
         }
 
+        // Creates CancellationToken that will be cancelled when nothing is using this model anymore.
         protected CancellationToken CancelOnEnd()
         {
             _cancellation ??= new CancellationTokenSource();
@@ -52,6 +53,7 @@ namespace Behc.Mvp.Model
             return _cancellation.Token;
         }
         
+        // Automatically disposes an object when nothing is using this model anymore.
         protected void DisposeOnEnd(IDisposable disposable)
         {
             _disposeOnEnd ??= new List<IDisposable>();
@@ -59,8 +61,10 @@ namespace Behc.Mvp.Model
             _disposeOnEnd.Add(disposable);
         }
         
+        // Called when first presenter starts using this model. 
         protected virtual void OnBegin() { }
 
+        // Called when last presenter stops using this model. 
         protected virtual void OnEnd() { }
     }
 }

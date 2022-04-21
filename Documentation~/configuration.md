@@ -1,11 +1,11 @@
-Additive scene loading
+##Configuration
 
-Each scene have root element with configuration script
+*(wip)*
+Configuration elements:
+ - Root element on scene (additive loading)
+ - ScriptableObject (for addressables)
 
-Simple di
+MiniDiContainer - simplistic dependency injection system
 
-Use pure di (constructor) where possible
-
-IInjectable for monobehaviors
-
+Use pure di (by constructor) where possible, and IInjectable for MonoBehaviours
 Get dependencies from context or resolve from container, but only inside configuration phase
