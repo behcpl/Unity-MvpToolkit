@@ -21,14 +21,12 @@ namespace Behc.Mvp.Presenters
         [SerializeField] private float _hideDelayTime = 6.0f / 60.0f;
 #pragma warning restore CS0649
 
-        private IToolTipProvider _currentToolTipProvider;
-        private float _currentHideTimer;
-
-        private IToolTipProvider _newToolTipProvider;
-        private float _newShowTimer;
-
         private IPresenter _toolTipPresenter;
         private object _toolTipModel;
+        private object _newToolTipModel;
+
+        private float _currentHideTimer;
+        private float _newShowTimer;
 
         //TODO: handle animation
         //TODO: handle multiple show/hide items
@@ -91,30 +89,32 @@ namespace Behc.Mvp.Presenters
                     break;
             }
 
-            if (newProvider == _currentToolTipProvider)
+            object newModel = newProvider?.GetToolTip(results.Count > 0 ? results[0].gameObject : null);
+            if (newModel == _toolTipModel)
             {
-                _newToolTipProvider = null;
+                _newToolTipModel = null;
                 _currentHideTimer = 0;
                 _newShowTimer = 0;
             }
-            else if (newProvider == _newToolTipProvider)
+            else if (newModel == _newToolTipModel)
             {
                 _currentHideTimer += Time.smoothDeltaTime;
                 _newShowTimer += Time.smoothDeltaTime;
             }
             else
             {
-                _newToolTipProvider = newProvider;
+                _newToolTipModel = newModel;
             }
 
-            if (_newToolTipProvider == null && _currentHideTimer >= _hideDelayTime || _newToolTipProvider != null && _newShowTimer >= _showDelayTime)
+            if (_newToolTipModel == null && _currentHideTimer >= _hideDelayTime || _newToolTipModel != null && _newShowTimer >= _showDelayTime)
             {
-                _currentToolTipProvider = newProvider;
-                _model.SetCurrentToolTip(_currentToolTipProvider?.GetToolTip());
+                _model.SetCurrentToolTip(_newToolTipModel);
             }
 
             if (_toolTipPresenter != null)
+            {
                 UpdateToolTipTransform(_toolTipPresenter.RectTransform, mousePos);
+            }
         }
 
         private void UpdateToolTipTransform(RectTransform tm, Vector2 pointerPos)
