@@ -13,13 +13,15 @@ namespace Behc.Mvp.Presenters.Factories
         private readonly PresenterUpdateKernel _updateKernel;
         private readonly Transform _container;
         private readonly List<IPresenter> _unused = new List<IPresenter>();
+        private readonly int _maximumPoolSize;
 
-        public PooledFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, int initialPoolSize)
+        public PooledFactory(GameObject prefab, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, Transform container, int initialPoolSize = 0, int maximumPoolSize = int.MaxValue)
         {
             _prefab = prefab;
-            _container = container;
             _presenterMap = presenterMap;
             _updateKernel = updateKernel;
+            _container = container;
+            _maximumPoolSize = maximumPoolSize;
 
             for (int i = 0; i < initialPoolSize; i++)
                 _unused.Add(CreateNewObject(_container));
@@ -43,6 +45,13 @@ namespace Behc.Mvp.Presenters.Factories
 
         public void DestroyPresenter(IPresenter presenter)
         {
+            if (_unused.Count >= _maximumPoolSize)
+            {
+                presenter.Destroy();
+                Object.Destroy(presenter.RectTransform.gameObject);
+                return;
+            }
+
             if (presenter.RectTransform.parent != _container)
                 presenter.RectTransform.SetParent(_container, false);
 
@@ -72,15 +81,15 @@ namespace Behc.Mvp.Presenters.Factories
     public static class PooledFactoryExtensions
     {
         [MustUseReturnValue]
-        public static IDisposable RegisterPool<T>(this PresenterMap presenterMap, GameObject prefab, RectTransform container, PresenterUpdateKernel updateKernel, int initialPoolSize)
+        public static IDisposable RegisterPool<T>(this PresenterMap presenterMap, GameObject prefab, PresenterUpdateKernel updateKernel, RectTransform container, int initialPoolSize = 0, int maximumPoolSize = int.MaxValue)
         {
-            return presenterMap.Register<T>(new PooledFactory(prefab, container, presenterMap, updateKernel, initialPoolSize));
+            return presenterMap.Register<T>(new PooledFactory(prefab, presenterMap, updateKernel, container, initialPoolSize, maximumPoolSize));
         }
 
         [MustUseReturnValue]
-        public static IDisposable RegisterPool<T>(this PresenterMap presenterMap, GameObject prefab, RectTransform container, PresenterUpdateKernel updateKernel, int initialPoolSize, Func<T, bool> predicate)
+        public static IDisposable RegisterPool<T>(this PresenterMap presenterMap, GameObject prefab, PresenterUpdateKernel updateKernel, RectTransform container, Func<T, bool> predicate, int initialPoolSize = 0, int maximumPoolSize = int.MaxValue)
         {
-            return presenterMap.Register<T>(new PooledFactory(prefab, container, presenterMap, updateKernel, initialPoolSize), predicate);
+            return presenterMap.Register<T>(new PooledFactory(prefab, presenterMap, updateKernel, container, initialPoolSize, maximumPoolSize), predicate);
         }
     }
 }

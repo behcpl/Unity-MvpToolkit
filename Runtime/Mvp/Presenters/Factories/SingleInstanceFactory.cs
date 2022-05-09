@@ -13,7 +13,7 @@ namespace Behc.Mvp.Presenters.Factories
         private IPresenter _presenter;
         private int _refCount;
 
-        public SingleInstanceFactory(GameObject instance, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel)
+        public SingleInstanceFactory(GameObject instance, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, Transform container)
         {
             _instance = instance;
             _container = container;
@@ -59,15 +59,15 @@ namespace Behc.Mvp.Presenters.Factories
     public static class SingleInstanceFactoryExtensions
     {
         [MustUseReturnValue]
-        public static IDisposable RegisterInstance<T>(this PresenterMap presenterMap, GameObject instance, RectTransform container, PresenterUpdateKernel updateKernel)
+        public static IDisposable RegisterInstance<T>(this PresenterMap presenterMap, GameObject instance, PresenterUpdateKernel updateKernel, RectTransform container)
         {
-            return presenterMap.Register<T>(new SingleInstanceFactory(instance, container, presenterMap, updateKernel));
+            return presenterMap.Register<T>(new SingleInstanceFactory(instance, presenterMap, updateKernel, container));
         }
 
         [MustUseReturnValue]
-        public static IDisposable RegisterInstance<T>(this PresenterMap presenterMap, GameObject instance, RectTransform container, PresenterUpdateKernel updateKernel, Func<T, bool> predicate)
+        public static IDisposable RegisterInstance<T>(this PresenterMap presenterMap, GameObject instance, PresenterUpdateKernel updateKernel, RectTransform container, Func<T, bool> predicate)
         {
-            return presenterMap.Register<T>(new SingleInstanceFactory(instance, container, presenterMap, updateKernel), predicate);
+            return presenterMap.Register<T>(new SingleInstanceFactory(instance, presenterMap, updateKernel, container), predicate);
         }
     }
 }

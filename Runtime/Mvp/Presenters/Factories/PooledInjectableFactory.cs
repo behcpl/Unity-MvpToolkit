@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Behc.Mvp.Presenter;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 // ReSharper disable SuspiciousTypeConversion.Global
 
@@ -13,13 +14,15 @@ namespace Behc.Mvp.Presenters.Factories
         private readonly PresenterUpdateKernel _updateKernel;
         private readonly Transform _container;
         private readonly List<IPresenter> _unused = new List<IPresenter>();
+        private readonly int _maximumPoolSize;
 
-        protected PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel)
+        protected PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, int maximumPoolSize = int.MaxValue)
         {
             _prefab = prefab;
             _container = container;
             _presenterMap = presenterMap;
             _updateKernel = updateKernel;
+            _maximumPoolSize = maximumPoolSize;
         }
 
         public IPresenter CreatePresenter(RectTransform parentTransform)
@@ -40,6 +43,13 @@ namespace Behc.Mvp.Presenters.Factories
 
         public void DestroyPresenter(IPresenter presenter)
         {
+            if (_unused.Count >= _maximumPoolSize)
+            {
+                presenter.Destroy();
+                Object.Destroy(presenter.RectTransform.gameObject);
+                return;
+            }
+
             if (presenter.RectTransform.parent != _container)
                 presenter.RectTransform.SetParent(_container, false);
 
@@ -80,8 +90,8 @@ namespace Behc.Mvp.Presenters.Factories
     {
         private readonly T1 _param1;
 
-        public PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, int initialPoolSize, in T1 p1)
-            : base(prefab, container, presenterMap, updateKernel)
+        public PooledInjectableFactory(GameObject prefab, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, Transform container, in T1 p1, int initialPoolSize = 0, int maximumPoolSize = int.MaxValue)
+            : base(prefab, container, presenterMap, updateKernel, maximumPoolSize)
         {
             _param1 = p1;
             InitializePool(initialPoolSize);
@@ -89,7 +99,7 @@ namespace Behc.Mvp.Presenters.Factories
 
         protected override void Inject(IPresenter presenter)
         {
-            IInjectable<T1> injectable = (IInjectable<T1>) presenter;
+            IInjectable<T1> injectable = (IInjectable<T1>)presenter;
             injectable.Inject(_param1);
         }
     }
@@ -99,8 +109,8 @@ namespace Behc.Mvp.Presenters.Factories
         private readonly T1 _param1;
         private readonly T2 _param2;
 
-        public PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, int initialPoolSize, in T1 p1, in T2 p2)
-            : base(prefab, container, presenterMap, updateKernel)
+        public PooledInjectableFactory(GameObject prefab, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, Transform container, in T1 p1, in T2 p2, int initialPoolSize = 0, int maximumPoolSize = int.MaxValue)
+            : base(prefab, container, presenterMap, updateKernel, maximumPoolSize)
         {
             _param1 = p1;
             _param2 = p2;
@@ -109,7 +119,7 @@ namespace Behc.Mvp.Presenters.Factories
 
         protected override void Inject(IPresenter presenter)
         {
-            IInjectable<T1, T2> injectable = (IInjectable<T1, T2>) presenter;
+            IInjectable<T1, T2> injectable = (IInjectable<T1, T2>)presenter;
             injectable.Inject(_param1, _param2);
         }
     }
@@ -120,8 +130,8 @@ namespace Behc.Mvp.Presenters.Factories
         private readonly T2 _param2;
         private readonly T3 _param3;
 
-        public PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, int initialPoolSize, in T1 p1, in T2 p2, in T3 p3)
-            : base(prefab, container, presenterMap, updateKernel)
+        public PooledInjectableFactory(GameObject prefab, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, Transform container, in T1 p1, in T2 p2, in T3 p3, int initialPoolSize = 0, int maximumPoolSize = int.MaxValue)
+            : base(prefab, container, presenterMap, updateKernel, maximumPoolSize)
         {
             _param1 = p1;
             _param2 = p2;
@@ -131,7 +141,7 @@ namespace Behc.Mvp.Presenters.Factories
 
         protected override void Inject(IPresenter presenter)
         {
-            IInjectable<T1, T2, T3> injectable = (IInjectable<T1, T2, T3>) presenter;
+            IInjectable<T1, T2, T3> injectable = (IInjectable<T1, T2, T3>)presenter;
             injectable.Inject(_param1, _param2, _param3);
         }
     }
@@ -143,8 +153,8 @@ namespace Behc.Mvp.Presenters.Factories
         private readonly T3 _param3;
         private readonly T4 _param4;
 
-        public PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, int initialPoolSize, in T1 p1, in T2 p2, in T3 p3, in T4 p4)
-            : base(prefab, container, presenterMap, updateKernel)
+        public PooledInjectableFactory(GameObject prefab, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, Transform container, in T1 p1, in T2 p2, in T3 p3, in T4 p4, int initialPoolSize = 0, int maximumPoolSize = int.MaxValue)
+            : base(prefab, container, presenterMap, updateKernel, maximumPoolSize)
         {
             _param1 = p1;
             _param2 = p2;
@@ -155,8 +165,124 @@ namespace Behc.Mvp.Presenters.Factories
 
         protected override void Inject(IPresenter presenter)
         {
-            IInjectable<T1, T2, T3, T4> injectable = (IInjectable<T1, T2, T3, T4>) presenter;
+            IInjectable<T1, T2, T3, T4> injectable = (IInjectable<T1, T2, T3, T4>)presenter;
             injectable.Inject(_param1, _param2, _param3, _param4);
+        }
+    }
+
+    public class PooledInjectableFactory<T1, T2, T3, T4, T5> : PooledInjectableFactory
+    {
+        private readonly T1 _param1;
+        private readonly T2 _param2;
+        private readonly T3 _param3;
+        private readonly T4 _param4;
+        private readonly T5 _param5;
+
+        public PooledInjectableFactory(GameObject prefab, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, Transform container, in T1 p1, in T2 p2, in T3 p3, in T4 p4, in T5 p5, int initialPoolSize = 0, int maximumPoolSize = int.MaxValue)
+            : base(prefab, container, presenterMap, updateKernel, maximumPoolSize)
+        {
+            _param1 = p1;
+            _param2 = p2;
+            _param3 = p3;
+            _param4 = p4;
+            _param5 = p5;
+            InitializePool(initialPoolSize);
+        }
+
+        protected override void Inject(IPresenter presenter)
+        {
+            IInjectable<T1, T2, T3, T4, T5> injectable = (IInjectable<T1, T2, T3, T4, T5>)presenter;
+            injectable.Inject(_param1, _param2, _param3, _param4, _param5);
+        }
+    }
+
+    public class PooledInjectableFactory<T1, T2, T3, T4, T5, T6> : PooledInjectableFactory
+    {
+        private readonly T1 _param1;
+        private readonly T2 _param2;
+        private readonly T3 _param3;
+        private readonly T4 _param4;
+        private readonly T5 _param5;
+        private readonly T6 _param6;
+
+        public PooledInjectableFactory(GameObject prefab, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, Transform container, in T1 p1, in T2 p2, in T3 p3, in T4 p4, in T5 p5, in T6 p6, int initialPoolSize = 0, int maximumPoolSize = int.MaxValue)
+            : base(prefab, container, presenterMap, updateKernel, maximumPoolSize)
+        {
+            _param1 = p1;
+            _param2 = p2;
+            _param3 = p3;
+            _param4 = p4;
+            _param5 = p5;
+            _param6 = p6;
+            InitializePool(initialPoolSize);
+        }
+
+        protected override void Inject(IPresenter presenter)
+        {
+            IInjectable<T1, T2, T3, T4, T5, T6> injectable = (IInjectable<T1, T2, T3, T4, T5, T6>)presenter;
+            injectable.Inject(_param1, _param2, _param3, _param4, _param5, _param6);
+        }
+    }
+
+    public class PooledInjectableFactory<T1, T2, T3, T4, T5, T6, T7> : PooledInjectableFactory
+    {
+        private readonly T1 _param1;
+        private readonly T2 _param2;
+        private readonly T3 _param3;
+        private readonly T4 _param4;
+        private readonly T5 _param5;
+        private readonly T6 _param6;
+        private readonly T7 _param7;
+
+        public PooledInjectableFactory(GameObject prefab, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, Transform container, in T1 p1, in T2 p2, in T3 p3, in T4 p4, in T5 p5, in T6 p6, in T7 p7, int initialPoolSize = 0, int maximumPoolSize = int.MaxValue)
+            : base(prefab, container, presenterMap, updateKernel, maximumPoolSize)
+        {
+            _param1 = p1;
+            _param2 = p2;
+            _param3 = p3;
+            _param4 = p4;
+            _param5 = p5;
+            _param6 = p6;
+            _param7 = p7;
+            InitializePool(initialPoolSize);
+        }
+
+        protected override void Inject(IPresenter presenter)
+        {
+            IInjectable<T1, T2, T3, T4, T5, T6, T7> injectable = (IInjectable<T1, T2, T3, T4, T5, T6, T7>)presenter;
+            injectable.Inject(_param1, _param2, _param3, _param4, _param5, _param6, _param7);
+        }
+    }
+
+    public class PooledInjectableFactory<T1, T2, T3, T4, T5, T6, T7, T8> : PooledInjectableFactory
+    {
+        private readonly T1 _param1;
+        private readonly T2 _param2;
+        private readonly T3 _param3;
+        private readonly T4 _param4;
+        private readonly T5 _param5;
+        private readonly T6 _param6;
+        private readonly T7 _param7;
+        private readonly T8 _param8;
+
+        public PooledInjectableFactory(GameObject prefab, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, Transform container, in T1 p1, in T2 p2, in T3 p3, in T4 p4, in T5 p5, in T6 p6, in T7 p7, in T8 p8, int initialPoolSize = 0, int maximumPoolSize = int.MaxValue)
+            : base(prefab, container, presenterMap, updateKernel, maximumPoolSize)
+        {
+            _param1 = p1;
+            _param2 = p2;
+            _param3 = p3;
+            _param4 = p4;
+            _param5 = p5;
+            _param6 = p6;
+            _param7 = p7;
+            _param8 = p8;
+            InitializePool(initialPoolSize);
+        }
+
+        protected override void Inject(IPresenter presenter)
+        {
+            IInjectable<T1, T2, T3, T4, T5, T6, T7, T8> injectable = (IInjectable<T1, T2, T3, T4, T5, T6, T7, T8>)presenter;
+            injectable.Inject(_param1, _param2, _param3, _param4, _param5, _param6, _param7, _param8);
         }
     }
 }
