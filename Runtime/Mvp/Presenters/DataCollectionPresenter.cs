@@ -66,7 +66,6 @@ namespace Behc.Mvp.Presenters
             _viewRegion = GetComponentInParent<ViewRegion>();
             if (_viewRegion != null)
             {
-                // Debug.LogWarning($"Bind to {_viewRegion.gameObject.name}, clip: {_viewRegion.ClipRect}");
                 UpdateClipRect(_viewRegion.ClipRect, out bool _);
             }
 
@@ -162,7 +161,6 @@ namespace Behc.Mvp.Presenters
 
         private void UpdateContent()
         {
-            // Debug.Log($"TestCollectionPresenter::UpdateContent <<{TestCounter.Counter}>>");
             //TODO: add fast path, when nothing changes?
             //TODO: add fast path for clearing/resetting?
 
