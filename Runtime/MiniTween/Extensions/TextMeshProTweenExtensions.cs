@@ -15,14 +15,25 @@ namespace Behc.MiniTween.Extensions
         {
             return system.Animate(text, SetAlpha, new Vector4(0, 0, 0, text.color.a), new Vector4(0, 0, 0, to), duration);
         }
+    
+        public static ITween AnimateMaxCharactersVisible(this TextMeshProUGUI text, ITweenSystem system, float to, float duration)
+        {
+            return system.Animate(text, SetAlpha, new Vector4(0, 0, 0, (float)text.maxVisibleCharacters / text.textInfo.characterCount), new Vector4(0, 0, 0, to), duration);
+        }
 
         private static void SetColor(object text, Vector4 value) => ((TextMeshProUGUI) text).color = new Color(value.x, value.y, value.z, value.w);
 
-        private static void SetAlpha(object img, Vector4 value)
+        private static void SetAlpha(object text, Vector4 value)
         {
-            Color src = ((TextMeshProUGUI) img).color;
+            Color src = ((TextMeshProUGUI) text).color;
             src.a = value.w;
-            ((TextMeshProUGUI) img).color = src;
+            ((TextMeshProUGUI) text).color = src;
+        }
+
+        private static void SetMaxCharactersVisible(object text, Vector4 value)
+        {
+            TextMeshProUGUI tmp = (TextMeshProUGUI)text;
+            tmp.maxVisibleCharacters = Mathf.RoundToInt(value.w * tmp.textInfo.characterCount);
         }
     }
 }
