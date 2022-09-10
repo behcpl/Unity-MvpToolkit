@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Behc.Mvp.Models;
+using Behc.Utils;
+using UnityEngine;
 
 namespace Behc.Mvp.Presenters
 {
@@ -8,6 +10,10 @@ namespace Behc.Mvp.Presenters
     // expected to have only a few items at once
     public class DataCollectionSimplePresenter : DataPresenterBase<ReactiveModel>
     {
+#pragma warning disable CS0649
+        [SerializeField] private RectTransform _insertAfter;
+#pragma warning restore CS0649
+
         private class ItemDesc
         {
             public object Model;
@@ -71,6 +77,12 @@ namespace Behc.Mvp.Presenters
         {
             IDataCollection dataCollection = (IDataCollection)_model;
 
+            int insertOffset = 0;
+            if (_insertAfter.IsNotNull())
+            {
+                insertOffset = _insertAfter.GetSiblingIndex() + 1;
+            }
+
             int index = 0;
             while (index < _itemPresenters.Count)
             {
@@ -112,11 +124,11 @@ namespace Behc.Mvp.Presenters
                     }
 
                     _itemPresenters.Add(newItem);
-                    newItem.Presenter.RectTransform.SetSiblingIndex(index);
-                    index++;  
+                    newItem.Presenter.RectTransform.SetSiblingIndex(index + insertOffset);
+                    index++;
                     continue;
                 }
-                
+
                 if (itemModel == _itemPresenters[index].Model)
                 {
                     index++;
@@ -127,8 +139,8 @@ namespace Behc.Mvp.Presenters
                 if (other >= 0)
                 {
                     (_itemPresenters[index], _itemPresenters[other]) = (_itemPresenters[other], _itemPresenters[index]);
-                    _itemPresenters[index].Presenter.RectTransform.SetSiblingIndex(index);
-                    _itemPresenters[other].Presenter.RectTransform.SetSiblingIndex(other);
+                    _itemPresenters[index].Presenter.RectTransform.SetSiblingIndex(index + insertOffset);
+                    _itemPresenters[other].Presenter.RectTransform.SetSiblingIndex(other + insertOffset);
                     index++;
                     continue;
                 }
@@ -147,7 +159,7 @@ namespace Behc.Mvp.Presenters
                 }
 
                 _itemPresenters.Insert(index, newItem);
-                newItem.Presenter.RectTransform.SetSiblingIndex(index);
+                newItem.Presenter.RectTransform.SetSiblingIndex(index + insertOffset);
                 index++;
             }
 
