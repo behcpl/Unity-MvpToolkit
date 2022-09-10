@@ -10,7 +10,7 @@ namespace Behc.Mvp.Presenters
         {
             base.Bind(model, parent, prepareForAnimation);
 
-            if (_curtain.IsNotNull())
+            if (_curtain != null)
             {
                 DisposeOnUnbind(_curtain.OnTrigger.Subscribe(CurtainClicked));
 
@@ -76,7 +76,7 @@ namespace Behc.Mvp.Presenters
                 }
             }
 
-            if (_curtain.IsNotNull())
+            if (_curtain != null)
             {
                 if (_items.Count == 0)
                 {

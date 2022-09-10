@@ -78,7 +78,7 @@ namespace Behc.Mvp.Presenters
             IDataCollection dataCollection = (IDataCollection)_model;
 
             int insertOffset = 0;
-            if (_insertAfter.IsNotNull())
+            if (_insertAfter != null)
             {
                 insertOffset = _insertAfter.GetSiblingIndex() + 1;
             }
