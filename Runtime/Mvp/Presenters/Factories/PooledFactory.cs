@@ -14,6 +14,8 @@ namespace Behc.Mvp.Presenters.Factories
         private readonly Transform _container;
         private readonly List<IPresenter> _unused = new List<IPresenter>();
         private readonly int _maximumPoolSize;
+     
+        private PresenterMap _localPresenterMap;
 
         public PooledFactory(GameObject prefab, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, Transform container, int initialPoolSize = 0, int maximumPoolSize = int.MaxValue)
         {
@@ -23,6 +25,7 @@ namespace Behc.Mvp.Presenters.Factories
             _container = container;
             _maximumPoolSize = maximumPoolSize;
 
+            //TODO: this doesn't work with LocalPresenterMap
             for (int i = 0; i < initialPoolSize; i++)
                 _unused.Add(CreateNewObject(_container));
         }
@@ -67,11 +70,17 @@ namespace Behc.Mvp.Presenters.Factories
             }
         }
 
+        public PresenterMap LocalPresenterMap()
+        {
+            _localPresenterMap ??= new PresenterMap(_presenterMap);
+            return _localPresenterMap;
+        }
+
         private IPresenter CreateNewObject(Transform container)
         {
             GameObject instance = Object.Instantiate(_prefab, container, false);
             IPresenter presenter = instance.GetComponent<IPresenter>();
-            presenter.Initialize(_presenterMap, _updateKernel);
+            presenter.Initialize(_localPresenterMap ?? _presenterMap, _updateKernel);
             instance.SetActive(false);
 
             return presenter;

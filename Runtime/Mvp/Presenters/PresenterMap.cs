@@ -1,15 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using Behc.Mvp.Presenters.Factories;
+using Behc.Utils;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 
 namespace Behc.Mvp.Presenters
 {
     public class PresenterMap
     {
-        private readonly List<MapItem> _map = new List<MapItem>();
+        private class MapItem
+        {
+            public IPresenterFactory DefaultFactory;
+            public List<(IPresenterFactory factory, Func<object, bool> predicate)> SpecializedFactories;
+        }
+
         private readonly PresenterMap _parentMap;
+        private Dictionary<Type, MapItem> _map;
+        private List<PresenterMap> _overrides;
 
         public PresenterMap(PresenterMap parentMap)
         {
@@ -19,75 +28,112 @@ namespace Behc.Mvp.Presenters
         [MustUseReturnValue]
         public IDisposable Register<T>(IPresenterFactory factory)
         {
-            return AddMapItem(new MapItem
-            {
-                ModelType = typeof(T),
-                Factory = factory
-            });
+            return AddDefaultFactory(typeof(T), factory);
         }
 
         [MustUseReturnValue]
         public IDisposable Register<T>(IPresenterFactory factory, Func<T, bool> predicate)
         {
-            return AddMapItem(new MapItem
-            {
-                ModelType = typeof(T),
-                Factory = factory,
-                Predicate = obj => predicate((T)obj)
-            });
+            return AddPredicatedFactory(typeof(T), factory, obj => predicate((T)obj));
+        }
+
+        public IDisposable RegisterOverride(PresenterMap overrideMap)
+        {
+            _overrides ??= new List<PresenterMap>();
+            _overrides.Add(overrideMap);
+            return new GenericDisposable(() => { _overrides.Remove(overrideMap); });
         }
 
         public IPresenter CreatePresenter(object model, RectTransform contentTransform)
         {
-            return GetDescriptor(model).Factory.CreatePresenter(contentTransform);
+            IPresenterFactory factory = TryGetPresenterFactory(model);
+            if(factory == null)
+                throw new Exception($"No PresenterFactory found for '{model.GetType().Name}' model!");
+            
+            return factory.CreatePresenter(contentTransform);
         }
 
         public void DestroyPresenter(object model, IPresenter presenter)
         {
-            GetDescriptor(model).Factory.DestroyPresenter(presenter);
+            IPresenterFactory factory = TryGetPresenterFactory(model);
+            if(factory == null)
+                throw new Exception($"No PresenterFactory found for '{model.GetType().Name}' model!");
+ 
+            factory.DestroyPresenter(presenter);
         }
 
-        private MapItem GetDescriptor(object model)
+        public IPresenterFactory TryGetPresenterFactory(object model)
         {
-            MapItem found = _map.Find(item => item.ModelType == model.GetType() && (item.Predicate?.Invoke(model) ?? true));
-            if (found != null)
-                return found;
-
-            if (_parentMap != null)
-                return _parentMap.GetDescriptor(model);
-
-            throw new Exception($"No Presenter found for '{model.GetType().Name}' model!");
-        }
-
-        private IDisposable AddMapItem(MapItem item)
-        {
-            _map.Add(item);
-            return new MapItemUnregister(_map, item);
-        }
-
-        private class MapItem
-        {
-            public Type ModelType;
-            public IPresenterFactory Factory;
-            public Func<object, bool> Predicate;
-        }
-
-        private class MapItemUnregister : IDisposable
-        {
-            private readonly List<MapItem> _map;
-            private readonly MapItem _item;
-
-            public MapItemUnregister(List<MapItem> map, MapItem item)
+            if (_overrides != null)
             {
-                _map = map;
-                _item = item;
+                for (int i = _overrides.Count - 1; i >= 0; i--)
+                {
+                    IPresenterFactory factory = _overrides[i].TryGetPresenterFactory(model);
+                    if (factory != null)
+                        return factory;
+                }
             }
 
-            public void Dispose()
+            if (_map != null && _map.TryGetValue(model.GetType(), out MapItem item))
             {
-                _item.Factory.Dispose();
-                _map.Remove(_item);
+                if (item.SpecializedFactories != null)
+                {
+                    foreach ((IPresenterFactory factory, Func<object,bool> predicate) in item.SpecializedFactories)
+                    {
+                        if (predicate(model))
+                        {
+                            return factory;
+                        }
+                    }
+                }
+
+                return item.DefaultFactory;
             }
+            
+            return _parentMap?.TryGetPresenterFactory(model);
+        }
+
+        private IDisposable AddDefaultFactory(Type modelType, IPresenterFactory presenterFactory)
+        {
+            MapItem mapItem = GetOrCreateMapItem(modelType);        
+
+            if (mapItem.DefaultFactory != null)
+                throw new Exception($"Default factory for model '{modelType.Name}' already exist! Use RegisterOverride if you want replace existing one.");
+
+            mapItem.DefaultFactory = presenterFactory;
+            return new GenericDisposable(() =>
+            {
+                presenterFactory.Dispose();
+                mapItem.DefaultFactory = null;
+            });
+        }
+
+        private IDisposable AddPredicatedFactory(Type modelType, IPresenterFactory presenterFactory, Func<object, bool> wrappedPredicate)
+        {
+            MapItem mapItem = GetOrCreateMapItem(modelType);
+            mapItem.SpecializedFactories ??= new List<(IPresenterFactory factory, Func<object, bool> predicate)>();
+
+            var tuple = (presenterFactory, wrappedPredicate);
+            mapItem.SpecializedFactories.Add(tuple);
+            
+            return new GenericDisposable(() =>
+            {
+                presenterFactory.Dispose();
+                mapItem.SpecializedFactories.Remove(tuple);
+            });
+        }
+
+        private MapItem GetOrCreateMapItem(Type modelType)
+        {
+            _map ??= new Dictionary<Type, MapItem>();
+
+            if (_map.TryGetValue(modelType, out MapItem mapItem))
+                return mapItem;
+            
+            mapItem = new MapItem();
+            _map.Add(modelType, mapItem);
+
+            return mapItem;
         }
     }
 }

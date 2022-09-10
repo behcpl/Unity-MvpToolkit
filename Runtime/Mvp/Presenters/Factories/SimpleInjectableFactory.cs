@@ -12,6 +12,8 @@ namespace Behc.Mvp.Presenters.Factories
         private readonly PresenterMap _presenterMap;
         private readonly PresenterUpdateKernel _updateKernel;
 
+        private PresenterMap _localPresenterMap;
+
         protected SimpleInjectableFactory(GameObject prefab, PresenterMap presenterMap, PresenterUpdateKernel updateKernel)
         {
             _prefab = prefab;
@@ -25,7 +27,7 @@ namespace Behc.Mvp.Presenters.Factories
             IPresenter presenter = instance.GetComponent<IPresenter>();
 
             Inject(presenter);
-            presenter.Initialize(_presenterMap, _updateKernel);
+            presenter.Initialize(_localPresenterMap ?? _presenterMap, _updateKernel);
             instance.SetActive(false);
 
             return presenter;
@@ -41,6 +43,12 @@ namespace Behc.Mvp.Presenters.Factories
         public void Dispose()
         {
             //NOOP
+        }
+
+        public PresenterMap LocalPresenterMap()
+        {
+            _localPresenterMap ??= new PresenterMap(_presenterMap);
+            return _localPresenterMap;
         }
 
         protected abstract void Inject(IPresenter presenter);
