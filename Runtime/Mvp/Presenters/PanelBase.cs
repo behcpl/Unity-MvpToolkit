@@ -20,6 +20,7 @@ namespace Behc.Mvp.Presenters
         private readonly List<PresenterField> _presenters = new List<PresenterField>();
         private readonly List<IDisposable> _disposeOnDestroy = new List<IDisposable>();
         private readonly List<IDisposable> _disposeOnUnbind = new List<IDisposable>();
+        private readonly List<IDisposable> _disposeOnDeactivate = new List<IDisposable>();
 
         private PresenterUpdateKernel _updateKernel;
         private PresenterMap _presenterMap;
@@ -167,6 +168,9 @@ namespace Behc.Mvp.Presenters
             OnDeactivate();
 
             _presenters.ForEach(pf => pf.Presenter.Deactivate());
+
+            _disposeOnDeactivate.ForEach(d => d.Dispose());
+            _disposeOnDeactivate.Clear();
         }
 
         public virtual void ScheduledUpdate()
@@ -174,6 +178,12 @@ namespace Behc.Mvp.Presenters
 #if BEHC_MVPTOOLKIT_VERBOSE
             Debug.Log($"({name}) ScheduledUpdate <<{PresenterUpdateKernel.Counter}>>");
 #endif
+        }
+
+        // Automatically disposes an object when presenter is no longer active.
+        protected void DisposeOnDeactivate(IDisposable disposable)
+        {
+            _disposeOnDeactivate.Add(disposable);
         }
 
         // Automatically disposes an object when presenter is no longer needed.
