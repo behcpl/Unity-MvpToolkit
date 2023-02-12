@@ -18,7 +18,6 @@ namespace Behc.Mvp.Presenters
 
         private readonly PresenterMap _parentMap;
         private Dictionary<Type, MapItem> _map;
-        private List<PresenterMap> _overrides;
 
         public PresenterMap(PresenterMap parentMap)
         {
@@ -35,13 +34,6 @@ namespace Behc.Mvp.Presenters
         public IDisposable Register<T>(IPresenterFactory factory, Func<T, bool> predicate)
         {
             return AddPredicatedFactory(typeof(T), factory, obj => predicate((T)obj));
-        }
-
-        public IDisposable RegisterOverride(PresenterMap overrideMap)
-        {
-            _overrides ??= new List<PresenterMap>();
-            _overrides.Add(overrideMap);
-            return new GenericDisposable(() => { _overrides.Remove(overrideMap); });
         }
 
         public IPresenter CreatePresenter(object model, RectTransform contentTransform)
@@ -64,16 +56,6 @@ namespace Behc.Mvp.Presenters
 
         public IPresenterFactory TryGetPresenterFactory(object model)
         {
-            if (_overrides != null)
-            {
-                for (int i = _overrides.Count - 1; i >= 0; i--)
-                {
-                    IPresenterFactory factory = _overrides[i].TryGetPresenterFactory(model);
-                    if (factory != null)
-                        return factory;
-                }
-            }
-
             if (_map != null && _map.TryGetValue(model.GetType(), out MapItem item))
             {
                 if (item.SpecializedFactories != null)
@@ -98,7 +80,7 @@ namespace Behc.Mvp.Presenters
             MapItem mapItem = GetOrCreateMapItem(modelType);        
 
             if (mapItem.DefaultFactory != null)
-                throw new Exception($"Default factory for model '{modelType.Name}' already exist! Use RegisterOverride if you want replace existing one.");
+                throw new Exception($"Default factory for model '{modelType.Name}' already exist!");
 
             mapItem.DefaultFactory = presenterFactory;
             return new GenericDisposable(() =>
