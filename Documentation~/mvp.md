@@ -9,7 +9,7 @@
 8. [ToolTip manager](#tooltip-manager)
 
 
-##Basic Types
+## Basic Types
 
 
 ### Model
@@ -90,7 +90,7 @@ Also, being deferred, code like below doesn't trigger any updates (presenter is 
     firstSlot.Data = null;
 
 
-##Panel base
+## Panel base
 
 *(wip)*
 Base implementation of IPresenter interface. Most common use case will require to inherit from PanelBase<TModel>
@@ -100,7 +100,7 @@ It supports composition using RegisterPresenter
     PanelBase<T>, PanelCanvas<T>, PanelCanvasGroup<T> for user code
 
 
-##Data slot
+## Data slot
 
 *(wip)*
 Most basic container. Can dynamically assign Data, that presenter will try to show.
@@ -116,13 +116,13 @@ Presenters:
     DataSlotCurtainPresenter - transition as crosfade to curtain
     DataSlotSlidePresenter - old data moves out, while new data moves in 
 
-##Data collection
+## Data collection
 
 *(wip)*
 Container with multiple children. Presenters can use various layouts like list or grid.
 Presenters can be nested, i.e. list of sections, where each section has grid of items inside.
 
-##Data stack
+## Data stack
 
 *(wip)*
 Specialized container for data that have single top (and active) element. Most common use is for popup windows manager.
@@ -131,17 +131,17 @@ Specialized container for data that have single top (and active) element. Most c
 
 All data pushed to stack is expected to return some value when removed.
 
-##Popup menu manager
+## Popup menu manager
 
 *(wip)*
 Specialized container for popup menu structures
 
-##Toasts manager
+## Toasts manager
 
 *(wip)*
 Specialized container for toasts (short lived messages)
 
-##ToolTip manager
+## ToolTip manager
 
 *(wip)*
 Specialized container for tooltips (non-interactive, on-demand elements)

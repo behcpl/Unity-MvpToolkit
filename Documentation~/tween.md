@@ -1,4 +1,4 @@
-##MiniTween
+## MiniTween
 
 Very basic tweening engine. Only supports simple animation, no sequences or complex parameters like looping.
 
