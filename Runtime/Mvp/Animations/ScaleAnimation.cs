@@ -33,6 +33,9 @@ namespace Behc.Mvp.Animations
         {
             if (startTime >= _options.ShowDuration || _options.ShowDuration <= 0)
             {
+                _canvasGroup.alpha = 1.0f;
+                _transform.localScale = Vector3.one;
+                
                 onFinish?.Invoke();
                 return;
             }

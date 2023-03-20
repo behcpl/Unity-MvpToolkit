@@ -29,6 +29,8 @@ namespace Behc.Mvp.Animations
         {
             if (startTime >= _options.ShowDuration || _options.ShowDuration <= 0)
             {
+                _canvasGroup.alpha = 1;
+                
                 onFinish?.Invoke();
                 return;
             }
