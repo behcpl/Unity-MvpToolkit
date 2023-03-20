@@ -16,8 +16,6 @@ namespace Behc.Mvp.Presenters.Factories
         private readonly List<IPresenter> _unused = new List<IPresenter>();
         private readonly int _maximumPoolSize;
 
-        private PresenterMap _localPresenterMap;
-
         protected PooledInjectableFactory(GameObject prefab, Transform container, PresenterMap presenterMap, PresenterUpdateKernel updateKernel, int maximumPoolSize = int.MaxValue)
         {
             _prefab = prefab;
@@ -67,12 +65,6 @@ namespace Behc.Mvp.Presenters.Factories
             }
         }
 
-        public PresenterMap LocalPresenterMap()
-        {
-            _localPresenterMap ??= new PresenterMap(_presenterMap);
-            return _localPresenterMap;
-        }
-
         protected abstract void Inject(IPresenter presenter);
 
         protected void InitializePool(int initialPoolSize)
@@ -87,7 +79,7 @@ namespace Behc.Mvp.Presenters.Factories
         {
             GameObject instance = Object.Instantiate(_prefab, container, false);
             IPresenter presenter = instance.GetComponent<IPresenter>();
-            presenter.Initialize(_localPresenterMap ?? _presenterMap, _updateKernel);
+            presenter.Initialize(_presenterMap, _updateKernel);
             Inject(presenter);
             instance.SetActive(false);
             return presenter;
