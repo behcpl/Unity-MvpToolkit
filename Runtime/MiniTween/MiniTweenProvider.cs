@@ -26,5 +26,12 @@ namespace Behc.MiniTween
 
             return _kernel;
         }
+
+#if UNITY_EDITOR
+        protected override void OnEditorReset()
+        {
+            _kernel = null;
+        }
+#endif
     }
 }

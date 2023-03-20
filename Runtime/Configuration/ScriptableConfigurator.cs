@@ -58,5 +58,30 @@ namespace Behc.Configuration
             _disposables ??= new List<IDisposable>();
             _disposables.Add(disposable);
         }
+        
+#if UNITY_EDITOR
+        private void OnEnable()
+        {
+            UnityEditor.EditorApplication.playModeStateChanged += EditorApplicationOnplayModeStateChanged;
+        }
+
+        private void OnDisable()
+        {
+            UnityEditor.EditorApplication.playModeStateChanged -= EditorApplicationOnplayModeStateChanged;
+        }
+
+        private void EditorApplicationOnplayModeStateChanged(UnityEditor.PlayModeStateChange obj)
+        {
+            if (obj == UnityEditor.PlayModeStateChange.EnteredEditMode)
+            {
+                _disposables.Clear();
+                _disposables = null;
+                
+                OnEditorReset();
+            }
+        }
+
+        protected virtual void OnEditorReset() { }
+#endif
     }
 }
