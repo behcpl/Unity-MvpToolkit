@@ -1,6 +1,5 @@
 ﻿using Behc.Mvp.Models;
 using Behc.Mvp.Utils;
-using Behc.Utils;
 
 namespace Behc.Mvp.Presenters
 {

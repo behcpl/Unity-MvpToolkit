@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Behc.Mvp.Presenters.Factories;
 using Behc.Utils;
 using JetBrains.Annotations;
-using TMPro;
 using UnityEngine;
 
 namespace Behc.Mvp.Presenters

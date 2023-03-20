@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Behc.Mvp.Models;
-using Behc.Utils;
 using UnityEngine;
 
 namespace Behc.Mvp.Presenters
