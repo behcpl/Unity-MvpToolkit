@@ -74,7 +74,7 @@ namespace Behc.Configuration
         {
             if (obj == UnityEditor.PlayModeStateChange.EnteredEditMode)
             {
-                _disposables.Clear();
+                _disposables?.Clear();
                 _disposables = null;
                 
                 OnEditorReset();
