@@ -160,7 +160,7 @@ namespace Behc.Mvp.Presenters
                 {
                     BindingHelper.Unbind(fromModel, fromPresenter);
 
-                    PresenterMap.DestroyPresenter(fromModel, fromPresenter);
+                    _presenterMap.DestroyPresenter(fromModel, fromPresenter);
                 }
 
                 if (toPresenter != null && !_aborted)

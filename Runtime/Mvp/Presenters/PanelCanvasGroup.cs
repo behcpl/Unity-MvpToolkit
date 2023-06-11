@@ -8,7 +8,7 @@ namespace Behc.Mvp.Presenters
         [SerializeField] protected CanvasGroup _canvasGroup;
 #pragma warning restore CS0649
 
-        public override void Initialize(PresenterMap presenterMap, PresenterUpdateKernel kernel)
+        public override void Initialize(IPresenterMap presenterMap, PresenterUpdateKernel kernel)
         {
             base.Initialize(presenterMap, kernel);
 

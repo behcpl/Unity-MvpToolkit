@@ -47,7 +47,7 @@ namespace Behc.Mvp.Presenters
 
         private const float _THRESHOLD = 1;
 
-        public override void Initialize(PresenterMap presenterMap, PresenterUpdateKernel kernel)
+        public override void Initialize(IPresenterMap presenterMap, PresenterUpdateKernel kernel)
         {
             base.Initialize(presenterMap, kernel);
 
@@ -81,7 +81,7 @@ namespace Behc.Mvp.Presenters
 
                 BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
 
-                PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
+                _presenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
             }
 
             _itemPresenters.Clear();
@@ -226,7 +226,7 @@ namespace Behc.Mvp.Presenters
                     remove.Presenter.Deactivate();
 
                 BindingHelper.Unbind(remove.Model, remove.Presenter);
-                PresenterMap.DestroyPresenter(remove.Model, remove.Presenter);
+                _presenterMap.DestroyPresenter(remove.Model, remove.Presenter);
             }
 
             if (_itemRects.Count > 0)
@@ -293,7 +293,7 @@ namespace Behc.Mvp.Presenters
             {
                 if ((neverVisible || !_clipRect.Overlaps(itemRect)) && !alwaysVisible)
                     return;
-                itemDesc.Presenter = PresenterMap.CreatePresenter(itemDesc.Model, RectTransform);
+                itemDesc.Presenter = _presenterMap.CreatePresenter(itemDesc.Model, RectTransform);
                 SetInsetAndSize(itemDesc.Presenter.RectTransform, itemRect.position.x, itemRect.position.y, itemRect.width, itemRect.height);
                 BindingHelper.Bind(itemDesc.Model, itemDesc.Presenter, this, false);
                 if (IsActive)
@@ -321,7 +321,7 @@ namespace Behc.Mvp.Presenters
 
                 BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
 
-                PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
+                _presenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
 
                 itemDesc.Presenter = null;
             }

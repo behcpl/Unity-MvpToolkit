@@ -105,7 +105,7 @@ namespace Behc.Mvp.Presenters
 
         private const float _THRESHOLD = 1;
 
-        public override void Initialize(PresenterMap presenterMap, PresenterUpdateKernel kernel)
+        public override void Initialize(IPresenterMap presenterMap, PresenterUpdateKernel kernel)
         {
             base.Initialize(presenterMap, kernel);
 
@@ -144,7 +144,7 @@ namespace Behc.Mvp.Presenters
 
                 Assert.IsFalse(itemDesc.Presenter.IsAnimating, "Still animating!");
                 BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
-                PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
+                _presenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
             }
 
             _removedItems.Clear();
@@ -156,7 +156,7 @@ namespace Behc.Mvp.Presenters
 
                 Assert.IsFalse(itemDesc.Presenter.IsAnimating, "Still animating!");
                 BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
-                PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
+                _presenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
             }
 
             _itemPresenters.Clear();
@@ -593,7 +593,7 @@ namespace Behc.Mvp.Presenters
                 if (remove.ItemState == ItemState.WAITING_FOR_DESPAWN)
                 {
                     BindingHelper.Unbind(remove.Model, remove.Presenter);
-                    PresenterMap.DestroyPresenter(remove.Model, remove.Presenter);
+                    _presenterMap.DestroyPresenter(remove.Model, remove.Presenter);
                 }
                 else
                 {
@@ -745,7 +745,7 @@ namespace Behc.Mvp.Presenters
                 if (itemDesc.Presenter != null)
                 {
                     BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
-                    PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
+                    _presenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
                 }
 
                 _removedItems[i - 1] = _removedItems[_removedItems.Count - 1];
@@ -763,7 +763,7 @@ namespace Behc.Mvp.Presenters
                 if (itemDesc.AnimatingShow && itemDesc.Timer < itemDesc.Delay)
                     return;
 
-                itemDesc.Presenter = PresenterMap.CreatePresenter(itemDesc.Model, RectTransform);
+                itemDesc.Presenter = _presenterMap.CreatePresenter(itemDesc.Model, RectTransform);
                 SetInsetAndSize(itemDesc.Presenter.RectTransform, itemRect.position.x, itemRect.position.y, itemRect.width, itemRect.height);
 
                 BindingHelper.Bind(itemDesc.Model, itemDesc.Presenter, this, itemDesc.AnimatingShow || itemDesc.AnimatingHide);
@@ -816,7 +816,7 @@ namespace Behc.Mvp.Presenters
 
                 BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
 
-                PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
+                _presenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
 
                 itemDesc.Presenter = null;
             }

@@ -62,7 +62,7 @@ namespace Behc.Mvp.Presenters
                 ItemDesc desc = new ItemDesc
                 {
                     Model = dataModel,
-                    Presenter = PresenterMap.CreatePresenter(dataModel, RectTransform)
+                    Presenter = _presenterMap.CreatePresenter(dataModel, RectTransform)
                 };
                 _items.Add(desc);
 
@@ -85,7 +85,7 @@ namespace Behc.Mvp.Presenters
                     itemDesc.Presenter.AbortAnimations();
 
                 BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
-                PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
+                _presenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
             }
 
             _items.Clear();
@@ -96,7 +96,7 @@ namespace Behc.Mvp.Presenters
                     itemDesc.Presenter.AbortAnimations();
 
                 BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
-                PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
+                _presenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
             }
 
             _hidingItems.Clear();
@@ -263,7 +263,7 @@ namespace Behc.Mvp.Presenters
                     {
                         State = ItemState.ANIMATE_SHOW,
                         Model = dataModel,
-                        Presenter = PresenterMap.CreatePresenter(dataModel, RectTransform)
+                        Presenter = _presenterMap.CreatePresenter(dataModel, RectTransform)
                     };
                     BindingHelper.Bind(desc.Model, desc.Presenter, this, true);
                     desc.Presenter.AnimateShow(0, () =>
@@ -307,7 +307,7 @@ namespace Behc.Mvp.Presenters
                 if (hidingDesc.State == ItemState.READY_TO_REMOVE)
                 {
                     BindingHelper.Unbind(hidingDesc.Model, hidingDesc.Presenter);
-                    PresenterMap.DestroyPresenter(hidingDesc.Model, hidingDesc.Presenter);
+                    _presenterMap.DestroyPresenter(hidingDesc.Model, hidingDesc.Presenter);
                 }
             }
 

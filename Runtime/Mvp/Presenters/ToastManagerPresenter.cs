@@ -95,7 +95,7 @@ namespace Behc.Mvp.Presenters
                 {
                     BindingHelper.Unbind(item.Model, item.Presenter);
                     _model.FinishToast(item.Model);
-                    PresenterMap.DestroyPresenter(item.Model, item.Presenter);
+                    _presenterMap.DestroyPresenter(item.Model, item.Presenter);
                     item.Stage = ToastStage.WAITING_TO_REMOVE;
                 }
             }
@@ -108,7 +108,7 @@ namespace Behc.Mvp.Presenters
                 if (item != null)
                     continue;
 
-                IPresenter toastPresenter = PresenterMap.CreatePresenter(toast, RectTransform);
+                IPresenter toastPresenter = _presenterMap.CreatePresenter(toast, RectTransform);
                 BindingHelper.Bind(toast, toastPresenter, this, true);
                 //do not activate, toasts should never have any interaction
 

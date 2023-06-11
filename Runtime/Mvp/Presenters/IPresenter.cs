@@ -12,7 +12,7 @@ namespace Behc.Mvp.Presenters
 
         // Called exactly once, when presenter is created or registered (if loaded as part of scene),
         // this is especially important for object pools, as reused presenter is not initialized multiple times
-        void Initialize(PresenterMap presenterMap, PresenterUpdateKernel kernel);
+        void Initialize(IPresenterMap presenterMap, PresenterUpdateKernel kernel);
 
         // Called before destroying GameObjects, most likely on unregister.
         void Destroy();

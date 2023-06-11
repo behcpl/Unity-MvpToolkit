@@ -34,7 +34,7 @@ namespace Behc.Mvp.Presenters
             foreach (ItemDesc item in _itemPresenters)
             {
                 BindingHelper.Unbind(item.Model, item.Presenter);
-                PresenterMap.DestroyPresenter(item.Model, item.Presenter);
+                _presenterMap.DestroyPresenter(item.Model, item.Presenter);
             }
 
             _itemPresenters.Clear();
@@ -98,7 +98,7 @@ namespace Behc.Mvp.Presenters
                 }
 
                 BindingHelper.Unbind(item.Model, item.Presenter);
-                PresenterMap.DestroyPresenter(item.Model, item.Presenter);
+                _presenterMap.DestroyPresenter(item.Model, item.Presenter);
 
                 _itemPresenters.RemoveAt(index);
             }
@@ -112,7 +112,7 @@ namespace Behc.Mvp.Presenters
                     newItem = new ItemDesc
                     {
                         Model = itemModel,
-                        Presenter = PresenterMap.CreatePresenter(itemModel, RectTransform),
+                        Presenter = _presenterMap.CreatePresenter(itemModel, RectTransform),
                     };
 
                     BindingHelper.Bind(newItem.Model, newItem.Presenter, this, false);
@@ -147,7 +147,7 @@ namespace Behc.Mvp.Presenters
                 newItem = new ItemDesc
                 {
                     Model = itemModel,
-                    Presenter = PresenterMap.CreatePresenter(itemModel, RectTransform),
+                    Presenter = _presenterMap.CreatePresenter(itemModel, RectTransform),
                 };
 
                 BindingHelper.Bind(newItem.Model, newItem.Presenter, this, false);

@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using Behc.Mvp.Presenters.Factories;
 using Behc.Utils;
 using JetBrains.Annotations;
-using UnityEngine;
 
 namespace Behc.Mvp.Presenters
 {
-    public class PresenterMap
+    public class PresenterMap : IPresenterMap
     {
         private class MapItem
         {
@@ -15,10 +14,10 @@ namespace Behc.Mvp.Presenters
             public List<(IPresenterFactory factory, Func<object, bool> predicate)> SpecializedFactories;
         }
 
-        private readonly PresenterMap _parentMap;
+        private readonly IPresenterMap _parentMap;
         private Dictionary<Type, MapItem> _map;
 
-        public PresenterMap(PresenterMap parentMap)
+        public PresenterMap(IPresenterMap parentMap)
         {
             _parentMap = parentMap;
         }
@@ -33,24 +32,6 @@ namespace Behc.Mvp.Presenters
         public IDisposable Register<T>(IPresenterFactory factory, Func<T, bool> predicate)
         {
             return AddPredicatedFactory(typeof(T), factory, obj => predicate((T)obj));
-        }
-
-        public IPresenter CreatePresenter(object model, RectTransform contentTransform)
-        {
-            IPresenterFactory factory = TryGetPresenterFactory(model);
-            if(factory == null)
-                throw new Exception($"No PresenterFactory found for '{model.GetType().Name}' model!");
-            
-            return factory.CreatePresenter(contentTransform);
-        }
-
-        public void DestroyPresenter(object model, IPresenter presenter)
-        {
-            IPresenterFactory factory = TryGetPresenterFactory(model);
-            if(factory == null)
-                throw new Exception($"No PresenterFactory found for '{model.GetType().Name}' model!");
- 
-            factory.DestroyPresenter(presenter);
         }
 
         public IPresenterFactory TryGetPresenterFactory(object model)

@@ -91,7 +91,7 @@ namespace Behc.Mvp.Presenters
 
                 BindingHelper.Unbind(fromModel, fromPresenter);
 
-                PresenterMap.DestroyPresenter(fromModel, fromPresenter);
+                _presenterMap.DestroyPresenter(fromModel, fromPresenter);
             }
 
             if (fromModel == null && toModel != null)
@@ -119,7 +119,7 @@ namespace Behc.Mvp.Presenters
             if (model == null)
                 return null;
 
-            IPresenter presenter = PresenterMap.CreatePresenter(((IDataSlot)_model).Data, RectTransform);
+            IPresenter presenter = _presenterMap.CreatePresenter(((IDataSlot)_model).Data, RectTransform);
             if (!_preserveChildTransform)
             {
                 RectTransform rt = presenter.RectTransform;
@@ -156,7 +156,7 @@ namespace Behc.Mvp.Presenters
             if (_activePresenter != null)
             {
                 BindingHelper.Unbind(_activeModel, _activePresenter);
-                PresenterMap.DestroyPresenter(_activeModel, _activePresenter);
+                _presenterMap.DestroyPresenter(_activeModel, _activePresenter);
 
                 _activePresenter = null;
                 _activeModel = null;

@@ -23,14 +23,14 @@ namespace Behc.Mvp.Presenters
         private readonly List<IDisposable> _disposeOnDeactivate = new List<IDisposable>();
 
         private PresenterUpdateKernel _updateKernel;
-        private PresenterMap _presenterMap;
+        private IPresenterMap _presenterMap;
 
         public RectTransform RectTransform => (RectTransform)transform;
 
         public bool IsActive => _active;
         public bool IsAnimating { get; private set; }
 
-        public virtual void Initialize(PresenterMap presenterMap, PresenterUpdateKernel kernel)
+        public virtual void Initialize(IPresenterMap presenterMap, PresenterUpdateKernel kernel)
         {
 #if BEHC_MVPTOOLKIT_VERBOSE
             Debug.Log($"({name}) <color=#ff00ff>Initialize</color> <<{PresenterUpdateKernel.Counter}>>");
@@ -233,5 +233,7 @@ namespace Behc.Mvp.Presenters
         {
             _updateKernel.RequestUpdate(this);
         }
+
+        protected IPresenterMap GetPresenterMap() => _presenterMap;
     }
 }
