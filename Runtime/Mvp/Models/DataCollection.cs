@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace Behc.Mvp.Models
@@ -19,6 +20,22 @@ namespace Behc.Mvp.Models
         {
             _data.AddRange(items);
             NotifyChanges();
+        }
+
+        public void Remove(object item)
+        {
+            if (_data.Remove(item))
+            {
+                NotifyChanges();
+            }
+        }
+
+        public void RemoveAll(Predicate<object> match)
+        {
+            if (_data.RemoveAll(match) > 0)
+            {
+                NotifyChanges();
+            }
         }
 
         public void Clear()
@@ -47,7 +64,23 @@ namespace Behc.Mvp.Models
             _data.AddRange(items);
             NotifyChanges();
         }
+        
+        public void Remove(T item)
+        {
+            if (_data.Remove(item))
+            {
+                NotifyChanges();
+            }
+        }
 
+        public void RemoveAll(Predicate<T> match)
+        {
+            if (_data.RemoveAll(match) > 0)
+            {
+                NotifyChanges();
+            }
+        }
+        
         public void Clear()
         {
             _data.Clear();
