@@ -8,17 +8,14 @@ namespace Behc.Configuration
     {
         private List<IDisposable> _disposables;
 
-        protected abstract void OnLoad(IDependencyResolver context);
-        protected virtual void OnUnload(IDependencyResolver context) { }
-
-        void IConfigurator.Load(IDependencyResolver context)
+        void IConfigurator.Load(IDependencyResolver resolver)
         {
-            OnLoad(context);
+            MiniDiActivator.CallMethod(resolver, this, "OnLoad");
         }
 
-        void IConfigurator.Unload(IDependencyResolver context)
+        void IConfigurator.Unload(IDependencyResolver resolver)
         {
-            OnUnload(context);
+            MiniDiActivator.CallMethod(resolver, this, "OnUnload");
 
             if (_disposables != null)
             {

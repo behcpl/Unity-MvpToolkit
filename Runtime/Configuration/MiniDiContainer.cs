@@ -1,28 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
-using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Behc.Configuration
 {
     public class MiniDiContainer : IDependencyResolver
     {
-        private readonly Dictionary<string, object> _namedInstances;
-        private readonly Dictionary<Type, object> _typedInstances;
-
+        private readonly Dictionary<Type, InstanceDescriptor> _descriptors;
         private readonly IDependencyResolver _parentContext;
+
+        private class InstanceDescriptor
+        {
+            public object UnnamedInstance;
+            public List<KeyValuePair<string, object>> NamedInstances;
+        }
 
         public MiniDiContainer(IDependencyResolver parentContext = null)
         {
-            _namedInstances = new Dictionary<string, object>();
-            _typedInstances = new Dictionary<Type, object>();
-
+            _descriptors = new Dictionary<Type, InstanceDescriptor>();
             _parentContext = parentContext;
         }
 
         public void BindInstance([NotNull] Type type, [NotNull] object instance)
         {
-            _typedInstances.Add(type, instance);
+            Assert.IsNotNull(type);
+            Assert.IsNotNull(instance);
+
+            if (!_descriptors.TryGetValue(type, out InstanceDescriptor descriptor))
+            {
+                descriptor = new InstanceDescriptor();
+                _descriptors.Add(type, descriptor);
+            }
+
+            Assert.IsNull(descriptor.UnnamedInstance);
+            descriptor.UnnamedInstance = instance;
+        }
+
+        public void BindInstance([NotNull] Type type, [NotNull] string name, [NotNull] object instance)
+        {
+            Assert.IsNotNull(type);
+            Assert.IsNotNull(name);
+            Assert.IsNotNull(instance);
+            Assert.IsFalse(string.IsNullOrEmpty(name));
+
+            if (!_descriptors.TryGetValue(type, out InstanceDescriptor descriptor))
+            {
+                descriptor = new InstanceDescriptor();
+                _descriptors.Add(type, descriptor);
+            }
+
+            string normalizedName = Normalize(name);
+            descriptor.NamedInstances ??= new List<KeyValuePair<string, object>>();
+
+            foreach (var kv in descriptor.NamedInstances)
+            {
+                Assert.AreNotEqual(normalizedName, kv.Key);
+            }
+
+            descriptor.NamedInstances.Add(new KeyValuePair<string, object>(normalizedName, instance));
         }
 
         public void BindInstance<T>([NotNull] T instance)
@@ -30,42 +66,49 @@ namespace Behc.Configuration
             BindInstance(typeof(T), instance);
         }
 
-        public void BindInterfaceToInstance<TInterface, TInstance>([NotNull] TInstance instance) where TInstance : TInterface
+        public void BindNamedInstance<T>([NotNull] string name, [NotNull] T instance)
         {
-            BindInstance(typeof(TInterface), instance);
+            BindInstance(typeof(T), name, instance);
         }
 
-        public void BindNamedInstance([NotNull] string name, [NotNull] object instance)
+        public object Resolve(Type type, string name, bool allowUnnamed)
         {
-            _namedInstances.Add(name, instance);
-        }
-
-        public T Resolve<T>() where T : class
-        {
-            if (_typedInstances.TryGetValue(typeof(T), out object value))
+            if (type == typeof(IDependencyResolver))
+                return this;
+            
+            InstanceDescriptor descriptor;
+            if (string.IsNullOrEmpty(name))
             {
-                T resolvedValue = value as T;
-                Debug.Assert(resolvedValue != null, $"Resolved value is null or not '{typeof(T).Name}' type!");
-                return resolvedValue;
+                if (_descriptors.TryGetValue(type, out descriptor) && descriptor.UnnamedInstance != null)
+                    return descriptor.UnnamedInstance;
+
+                return _parentContext?.Resolve(type, null, true);
             }
 
-            T parentValue = _parentContext?.Resolve<T>();
-            Debug.Assert(parentValue != null, $"Instance not found for '{typeof(T).Name}' type!");
-            return parentValue;
-        }
+            string normalizedName = Normalize(name);
 
-        public T Resolve<T>(string name) where T : class
-        {
-            if (_namedInstances.TryGetValue(name, out object value))
+            if (_descriptors.TryGetValue(type, out descriptor) && descriptor.NamedInstances != null)
             {
-                T resolvedValue = value as T;
-                Debug.Assert(resolvedValue != null, $"Resolved '{name}' value is null or not '{typeof(T).Name}' type!");
-                return resolvedValue;
+                foreach (var kv in descriptor.NamedInstances)
+                {
+                    if (kv.Key == normalizedName)
+                        return kv.Value;
+                }
             }
 
-            T parentValue =  _parentContext?.Resolve<T>(name);
-            Debug.Assert(parentValue != null, $"Instance not found for '{name}' of '{typeof(T).Name}' type!");
-            return parentValue;
+            object value = _parentContext?.Resolve(type, normalizedName, false);
+            if (value != null)
+                return value;
+
+            if (!allowUnnamed)
+                return null;
+
+            if (descriptor?.UnnamedInstance != null)
+                return descriptor.UnnamedInstance;
+
+            return _parentContext?.Resolve(type, null, true);
         }
+
+        private static string Normalize(string name) => name.ToLowerInvariant().Trim('_');
     }
 }

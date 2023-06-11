@@ -12,12 +12,9 @@ namespace Behc.Configuration
         
         [NonSerialized] private List<IDisposable> _disposables;
 
-        protected virtual void OnLoad(IDependencyResolver resolver) { }
-        protected virtual void OnUnload(IDependencyResolver resolver) { }
-
         void IConfigurator.Load(IDependencyResolver resolver)
         {
-            OnLoad(resolver);
+            MiniDiActivator.CallMethod(resolver, this, "OnLoad");
 
             if (_subConfigurators != null)
             {
@@ -39,7 +36,7 @@ namespace Behc.Configuration
                 }
             }
 
-            OnUnload(resolver);
+            MiniDiActivator.CallMethod(resolver, this, "OnUnload");
 
             if (_disposables != null)
             {
