@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2023-06-11
+### Breaking Changes
+- Configurators now use reflection to resolve OnLoad parameters, instead of using Resolve directly
+- Default containers no longer instantiate own PresenterMap, only using provided IPresenterMap
+### Changes
+- MultipartPresenterMap for side mounting maps
+- Added more mutating methods to DataCollection 
+
 ## [0.9.4] - 2023-03-21
 ### Bugfixes
 - Fixed nullptr exception
