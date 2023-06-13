@@ -6,7 +6,7 @@ using UnityEngine.Assertions;
 
 namespace Behc.Mvp.Presenters
 {
-    public class PanelBase<T> : MonoBehaviour, IPresenter where T : class
+    public class PanelPresenterBase<T> : MonoBehaviour, IPresenter where T : class
     {
         private class PresenterField
         {
@@ -26,6 +26,7 @@ namespace Behc.Mvp.Presenters
         private IPresenterMap _presenterMap;
 
         public RectTransform RectTransform => (RectTransform)transform;
+        public IPresenterMap PresenterMap => _presenterMap;
 
         public bool IsActive => _active;
         public bool IsAnimating { get; private set; }
@@ -42,7 +43,7 @@ namespace Behc.Mvp.Presenters
             OnInitialize();
         }
 
-        public virtual void Destroy()
+        public void Destroy()
         {
 #if BEHC_MVPTOOLKIT_VERBOSE
             Debug.Log($"({name}) <color=#800080>Destroy</color> <<{PresenterUpdateKernel.Counter}>>");
@@ -233,7 +234,5 @@ namespace Behc.Mvp.Presenters
         {
             _updateKernel.RequestUpdate(this);
         }
-
-        protected IPresenterMap GetPresenterMap() => _presenterMap;
     }
 }

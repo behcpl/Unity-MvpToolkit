@@ -5,7 +5,7 @@ namespace Behc.Mvp.Presenters
 {
     public class MultipartPresenterMap : IPresenterMap
     {
-        private List<IPresenterMap> _maps;
+        private readonly List<IPresenterMap> _maps;
 
         public MultipartPresenterMap()
         {

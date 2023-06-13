@@ -15,6 +15,7 @@ namespace Behc.Mvp.Presenters
         public virtual bool IsAnimating { get; } = false;
 
         public RectTransform RectTransform => (RectTransform)transform;
+        public IPresenterMap PresenterMap => _presenterMap;
 
         protected T _model;
         protected bool _contentChanged;
@@ -22,9 +23,9 @@ namespace Behc.Mvp.Presenters
         protected bool _scheduledUpdate;
 
         protected readonly List<IDisposable> _disposeOnUnbind = new List<IDisposable>();
-        protected IPresenterMap _presenterMap;
 
         private PresenterUpdateKernel _updateKernel;
+        private IPresenterMap _presenterMap;
         private SmallSet _blockers;
         private bool _activeSelf;
 
@@ -34,8 +35,8 @@ namespace Behc.Mvp.Presenters
             Debug.Log($"({name}) <color=#ff00ff>Initialize</color> <<{PresenterUpdateKernel.Counter}>>");
 #endif
 
-            _presenterMap = presenterMap;
             _updateKernel = kernel;
+            _presenterMap = presenterMap;
         }
 
         public virtual void Destroy()

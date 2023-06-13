@@ -48,14 +48,14 @@ namespace Behc.Mvp.Presenters
             if (_toolTipPresenter != null)
             {
                 BindingHelper.Unbind(_toolTipModel, _toolTipPresenter);
-                _presenterMap.DestroyPresenter(_toolTipModel, _toolTipPresenter);
+                PresenterMap.DestroyPresenter(_toolTipModel, _toolTipPresenter);
                 _toolTipPresenter = null;
             }
 
             _toolTipModel = _model.CurrentToolTip;
             if (_toolTipModel != null)
             {
-                _toolTipPresenter = _presenterMap.CreatePresenter(_toolTipModel, RectTransform);
+                _toolTipPresenter = PresenterMap.CreatePresenter(_toolTipModel, RectTransform);
                 BindingHelper.Bind(_toolTipModel, _toolTipPresenter, this, false);
 
                 LayoutRebuilder.ForceRebuildLayoutImmediate(_toolTipPresenter.RectTransform);

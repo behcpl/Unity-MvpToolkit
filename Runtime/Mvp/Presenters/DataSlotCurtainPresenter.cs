@@ -114,7 +114,7 @@ namespace Behc.Mvp.Presenters
                 {
                     BindingHelper.Unbind(fromModel, fromPresenter);
 
-                    _presenterMap.DestroyPresenter(fromModel, fromPresenter);
+                    PresenterMap.DestroyPresenter(fromModel, fromPresenter);
                 }
 
                 _activeModel = toModel;
