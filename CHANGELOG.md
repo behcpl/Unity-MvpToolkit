@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2023-06-13
+### Breaking Changes
+- Decompose NavigationOption flags to explicit enum and bool
+- Reintroduce PresenterMap property as IPresenterMap
+- Rename PanelBase/Canvas/Group to Panel/Canvas/Group/Presenter
+- seal overrides for Activate and Deactivate to guard against mistakes with OnActivate and OnDeactivate
+
 ## [0.10.0] - 2023-06-11
 ### Breaking Changes
 - Configurators now use reflection to resolve OnLoad parameters, instead of using Resolve directly
