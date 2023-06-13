@@ -5,13 +5,11 @@ using JetBrains.Annotations;
 
 namespace Behc.Navigation
 {
-    [Flags]
-    public enum NavigationOptions
+    public enum NavigationMode
     {
-        DEFAULT = 0, //replace current element, try to reuse context
-        KEEP_HISTORY = 0x01,
-        RESET_HISTORY = 0x02,
-        DONT_REUSE_CONTEXT = 0x04
+        REPLACE_LAST,
+        REPLACE_ALL,
+        KEEP_ALL
     }
 
     public class NavigationManager
@@ -27,7 +25,8 @@ namespace Behc.Navigation
 
         private bool _goBack;
         private string _next;
-        private NavigationOptions _nextOptions;
+        private NavigationMode _nextMode;
+        private bool _nextReuse;
         private object _nextParameters;
         private int _disposingInProgress;
         private Action _continuation;
@@ -39,11 +38,12 @@ namespace Behc.Navigation
             _disposingInProgress = -1;
         }
 
-        public void NavigateTo([NotNull] string name, [CanBeNull] object parameters, NavigationOptions options)
+        public void NavigateTo([NotNull] string name, [CanBeNull] object parameters, NavigationMode mode = NavigationMode.REPLACE_LAST, bool reuseContext = true)
         {
             ResetDeferredActions();
             _next = name;
-            _nextOptions = options;
+            _nextMode = mode;
+            _nextReuse = reuseContext;
             _nextParameters = parameters;
         }
 
@@ -78,26 +78,24 @@ namespace Behc.Navigation
 
             if (_next != null)
             {
-                bool keepHistory = (_nextOptions & NavigationOptions.KEEP_HISTORY) != 0;
-                bool resetHistory = (_nextOptions & NavigationOptions.RESET_HISTORY) != 0;
-                bool dontReuseContext = (_nextOptions & NavigationOptions.DONT_REUSE_CONTEXT) != 0;
-
+                NavigationMode nextMode = _nextMode;
+                bool nextReuse = _nextReuse;
                 string next = _next;
                 object parameters = _nextParameters;
 
                 ResetDeferredActions();
 
-                if (keepHistory || _stack.Count == 0)
+                if (nextMode == NavigationMode.KEEP_ALL || _stack.Count == 0)
                 {
-                    ProcessPushNew(next, parameters, dontReuseContext);
+                    ProcessPushNew(next, parameters, nextReuse);
                 }
-                else if (resetHistory)
+                else if (nextMode == NavigationMode.REPLACE_ALL)
                 {
-                    ProcessReplaceAll(next, parameters, dontReuseContext);
+                    ProcessReplaceAll(next, parameters, nextReuse);
                 }
                 else
                 {
-                    ProcessReplaceCurrent(next, parameters, dontReuseContext);
+                    ProcessReplaceCurrent(next, parameters, nextReuse);
                 }
             }
         }
@@ -142,24 +140,24 @@ namespace Behc.Navigation
             }
         }
 
-        private void ProcessPushNew(string name, object parameters, bool dontReuseContext)
+        private void ProcessPushNew(string name, object parameters, bool reuseContext)
         {
             INavigable navigable = null;
-            if (!dontReuseContext)
+            if (reuseContext)
             {
                 navigable = GetLastContext(name);
             }
 
             navigable ??= _navigableFactory.Create(name, parameters);
             navigable.Start();
-            
+
             _stack.Add(new NavigationPoint { Name = name, Navigable = navigable });
         }
 
-        private void ProcessReplaceAll(string name, object parameters, bool dontReuseContext)
+        private void ProcessReplaceAll(string name, object parameters, bool reuseContext)
         {
             NavigationPoint lastPoint = _stack[_stack.Count - 1];
-            if (lastPoint.Name != name || dontReuseContext)
+            if (lastPoint.Name != name || !reuseContext)
             {
                 lastPoint.Navigable.Stop();
                 lastPoint = default;
@@ -204,16 +202,16 @@ namespace Behc.Navigation
                 }
                 else
                 {
-                    ProcessPushNew(name, parameters, dontReuseContext);
+                    ProcessPushNew(name, parameters, reuseContext);
                 }
             }
         }
 
-        private void ProcessReplaceCurrent(string name, object parameters, bool dontReuseContext)
+        private void ProcessReplaceCurrent(string name, object parameters, bool reuseContext)
         {
             NavigationPoint lastPoint = _stack[_stack.Count - 1];
 
-            if (lastPoint.Name == name && !dontReuseContext)
+            if (lastPoint.Name == name && reuseContext)
             {
                 lastPoint.Navigable.Restart(parameters);
                 return;
@@ -245,7 +243,7 @@ namespace Behc.Navigation
                 if (_disposingInProgress >= 0)
                     return;
 
-                ProcessPushNew(name, parameters, dontReuseContext);
+                ProcessPushNew(name, parameters, reuseContext);
                 _continuation = null;
             }
         }
@@ -254,7 +252,8 @@ namespace Behc.Navigation
         {
             _goBack = false;
             _next = null;
-            _nextOptions = NavigationOptions.DEFAULT;
+            _nextMode = NavigationMode.REPLACE_LAST;
+            _nextReuse = true;
             _nextParameters = null;
         }
 
