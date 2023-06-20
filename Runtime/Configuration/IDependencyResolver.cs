@@ -19,5 +19,15 @@ namespace Behc.Configuration
         {
             return resolver.Resolve(typeof(T), name, false) as T;
         }
+
+        public static T CreateInstance<T>(this IDependencyResolver resolver) where T : class
+        {
+            return (T)MiniDiActivator.CreateInstance(resolver, typeof(T));
+        }
+        
+        public static T CreateInstance<T>(this IDependencyResolver resolver, params object[] additionalParameters) where T : class
+        {
+            return (T)MiniDiActivator.CreateInstance(resolver, typeof(T), additionalParameters);
+        }
     }
 }
