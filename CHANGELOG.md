@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.1] - 2023-07-09
+### Added
+- Complete missing features from MiniDiActivator
+- New INavigationRegistryInstaller with extensions for easier feature installing
+
 ## [0.11.0] - 2023-06-13
 ### Breaking Changes
 - Decompose NavigationOption flags to explicit enum and bool
