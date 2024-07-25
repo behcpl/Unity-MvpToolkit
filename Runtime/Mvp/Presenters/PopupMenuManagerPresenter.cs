@@ -106,7 +106,7 @@ namespace Behc.Mvp.Presenters
             if (placement == PopupMenuManager.Placement.PLACE_AT_CURSOR)
             {
 #if BEHC_MVPTOOLKIT_INPUTSYSTEM
-                Vector2 mousePos = Mouse.current.position.ReadValue();
+                Vector2 mousePos = Pointer.current.position.ReadValue();
 #else
                 Vector2 mousePos = Input.mousePosition;
 #endif
@@ -132,9 +132,14 @@ namespace Behc.Mvp.Presenters
                 return;
 
 #if BEHC_MVPTOOLKIT_INPUTSYSTEM
-            Vector2 mousePos = Mouse.current.position.ReadValue();
-            bool rmbDown = Mouse.current.rightButton.wasPressedThisFrame;
-            bool rmbUp = Mouse.current.rightButton.wasReleasedThisFrame;
+            Vector2 mousePos = Pointer.current.position.ReadValue();
+            bool rmbDown = false;
+            bool rmbUp = false;
+            if (Pointer.current is Mouse mouse)
+            {
+                 rmbDown = mouse.rightButton.wasPressedThisFrame;
+                 rmbUp = mouse.rightButton.wasReleasedThisFrame;
+            }
 #else
             Vector2 mousePos = Input.mousePosition;
             bool rmbDown = Input.GetMouseButtonDown(1);
