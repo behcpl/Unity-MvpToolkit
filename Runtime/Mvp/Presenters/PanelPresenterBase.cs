@@ -71,8 +71,11 @@ namespace Behc.Mvp.Presenters
             _updateKernel.RegisterPresenter(this, parent);
 
             OnBind(prepareForAnimation);
-
-            _presenters.ForEach(pf => pf.Presenter.Bind(pf.ModelSelector(_model), this, prepareForAnimation));
+            
+            foreach (PresenterField field in _presenters)
+            {
+                BindingHelper.Bind(field.ModelSelector(_model), field.Presenter, this, prepareForAnimation);
+            }
         }
 
         public void Unbind()
@@ -86,7 +89,10 @@ namespace Behc.Mvp.Presenters
           
             gameObject.SetActive(false); //TODO: this is optimization, check if some operations requires object to be still active
 
-            _presenters.ForEach(pf => pf.Presenter.Unbind());
+            foreach (PresenterField field in _presenters)
+            {
+                BindingHelper.Unbind(field.ModelSelector(_model), field.Presenter);
+            }
 
             OnUnbind();
             _updateKernel.UnregisterPresenter(this);
