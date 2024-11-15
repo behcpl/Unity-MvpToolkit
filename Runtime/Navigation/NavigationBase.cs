@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using JetBrains.Annotations;
 
 namespace Behc.Navigation
@@ -8,12 +9,19 @@ namespace Behc.Navigation
     {
         private List<IDisposable> _stopDisposables;
         private List<IDisposable> _disposables;
+        private CancellationTokenSource _cancellation;
 
-        protected virtual void OnStart() { }
+        protected virtual void OnStart()
+        {
+        }
 
-        protected virtual void OnRestart(object parameters) { }
+        protected virtual void OnRestart(object parameters)
+        {
+        }
 
-        protected virtual void OnStop() { }
+        protected virtual void OnStop()
+        {
+        }
 
         protected virtual void OnDispose(Action onComplete)
         {
@@ -32,6 +40,13 @@ namespace Behc.Navigation
             _disposables.Add(disposable);
         }
 
+        protected CancellationToken CancelOnStop()
+        {
+            _cancellation ??= new CancellationTokenSource();
+
+            return _cancellation.Token;
+        }
+
         void INavigable.Start()
         {
             OnStart();
@@ -44,6 +59,13 @@ namespace Behc.Navigation
 
         void INavigable.Stop()
         {
+            if (_cancellation != null)
+            {
+                _cancellation.Cancel();
+                _cancellation.Dispose();
+                _cancellation = null;
+            }
+
             OnStop();
 
             if (_stopDisposables != null)

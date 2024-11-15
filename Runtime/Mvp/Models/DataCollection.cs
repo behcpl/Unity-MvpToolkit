@@ -43,6 +43,11 @@ namespace Behc.Mvp.Models
             _data.Clear();
             NotifyChanges();
         }
+
+        public void Refresh()
+        {
+            NotifyChanges();
+        }
     }
 
     public class DataCollection<T> : ReactiveModel, IDataCollection where T : class
@@ -64,7 +69,7 @@ namespace Behc.Mvp.Models
             _data.AddRange(items);
             NotifyChanges();
         }
-        
+
         public void Remove(T item)
         {
             if (_data.Remove(item))
@@ -80,10 +85,15 @@ namespace Behc.Mvp.Models
                 NotifyChanges();
             }
         }
-        
+
         public void Clear()
         {
             _data.Clear();
+            NotifyChanges();
+        }
+
+        public void Refresh()
+        {
             NotifyChanges();
         }
     }

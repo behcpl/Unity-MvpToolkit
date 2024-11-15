@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Behc.Utils;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -24,6 +25,8 @@ namespace Behc.Mvp.Presenters
 
         private PresenterUpdateKernel _updateKernel;
         private IPresenterMap _presenterMap;
+        private CancellationTokenSource _cancelOnDeactivate;
+        private CancellationTokenSource _cancelOnUnbind;
 
         public RectTransform RectTransform => (RectTransform)transform;
         public IPresenterMap PresenterMap => _presenterMap;
@@ -63,15 +66,15 @@ namespace Behc.Mvp.Presenters
 #if BEHC_MVPTOOLKIT_VERBOSE
             Debug.Log($"({name}) <color=#FF0000>Bind</color> prepare:{prepareForAnimation} <<{PresenterUpdateKernel.Counter}>>");
 #endif
-    
+
             gameObject.SetActive(true);
             Debug.Assert(gameObject.activeInHierarchy, "Not active in hierarchy!");
 
-            _model = (T) model;
+            _model = (T)model;
             _updateKernel.RegisterPresenter(this, parent);
 
             OnBind(prepareForAnimation);
-            
+
             foreach (PresenterField field in _presenters)
             {
                 BindingHelper.Bind(field.ModelSelector(_model), field.Presenter, this, prepareForAnimation);
@@ -86,7 +89,11 @@ namespace Behc.Mvp.Presenters
 #if BEHC_MVPTOOLKIT_VERBOSE
             Debug.Log($"({name}) <color=#800000>Unbind</color> <<{PresenterUpdateKernel.Counter}>>");
 #endif
-          
+
+            _cancelOnUnbind?.Cancel();
+            _cancelOnUnbind?.Dispose();
+            _cancelOnUnbind = null;
+
             gameObject.SetActive(false); //TODO: this is optimization, check if some operations requires object to be still active
 
             foreach (PresenterField field in _presenters)
@@ -145,7 +152,7 @@ namespace Behc.Mvp.Presenters
             OnAbortAnimations();
 
             _presenters.ForEach(pf => pf.Presenter.AbortAnimations());
-            
+
             Assert.IsFalse(IsAnimating, "Presenter is still animating, check OnAbortAnimations()");
         }
 
@@ -171,6 +178,10 @@ namespace Behc.Mvp.Presenters
             Debug.Log($"({name}) <color=#008000>Deactivate</color> <<{PresenterUpdateKernel.Counter}>>");
 #endif
             _active = false;
+
+            _cancelOnDeactivate?.Cancel();
+            _cancelOnDeactivate?.Dispose();
+            _cancelOnDeactivate = null;
 
             OnDeactivate();
 
@@ -204,12 +215,31 @@ namespace Behc.Mvp.Presenters
         {
             _disposeOnDestroy.Add(disposable);
         }
-        
-        // Called only once, override to perform some initialization, i.e. RegisterPresenter
-        protected virtual void OnInitialize() { }
 
-        protected virtual void OnBind(bool prepareForAnimation) { }
-        protected virtual void OnUnbind() { }
+        protected CancellationToken CancelOnDeactivate()
+        {
+            _cancelOnDeactivate ??= new CancellationTokenSource();
+            return _cancelOnDeactivate.Token;
+        }
+
+        protected CancellationToken CancelOnUnbind()
+        {
+            _cancelOnUnbind ??= new CancellationTokenSource();
+            return _cancelOnUnbind.Token;
+        }
+
+        // Called only once, override to perform some initialization, i.e. RegisterPresenter
+        protected virtual void OnInitialize()
+        {
+        }
+
+        protected virtual void OnBind(bool prepareForAnimation)
+        {
+        }
+
+        protected virtual void OnUnbind()
+        {
+        }
 
         //Must call onFinish as a last action
         protected virtual void OnAnimateShow(float startTime, Action onFinish)
@@ -223,10 +253,17 @@ namespace Behc.Mvp.Presenters
             onFinish?.Invoke();
         }
 
-        protected virtual void OnAbortAnimations() { }
+        protected virtual void OnAbortAnimations()
+        {
+        }
 
-        protected virtual void OnActivate() { }
-        protected virtual void OnDeactivate() { }
+        protected virtual void OnActivate()
+        {
+        }
+
+        protected virtual void OnDeactivate()
+        {
+        }
 
         // Create composite presenter from multiple presenters. modelSelector must point to valid model (that subPresenter expects)
         protected void RegisterPresenter(Func<T, object> modelSelector, IPresenter subPresenter)

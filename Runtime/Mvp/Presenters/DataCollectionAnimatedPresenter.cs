@@ -252,13 +252,12 @@ namespace Behc.Mvp.Presenters
 
         public override void AbortAnimations()
         {
-
             Action showComplete = _onAnimateShowCompleted;
             _onAnimateShowCompleted = null;
-            
+
             Action hideCompleted = _onAnimateHideCompleted;
             _onAnimateHideCompleted = null;
-            
+
             foreach (ItemDesc itemDesc in _removedItems)
             {
                 if (itemDesc.Presenter == null)
@@ -393,6 +392,19 @@ namespace Behc.Mvp.Presenters
             return _layout.GetApproximatedContentSize(RectTransform.rect.size, model.Data.Count);
         }
 
+        public bool TryGetItemRect(object item, out Rect rect)
+        {
+            rect = default;
+            if (item == null)
+                return false;
+
+            if (!_itemIdToIndex.TryGetValue(item, out int value))
+                return false;
+
+            rect = _itemRects[value];
+            return true;
+        }
+        
         private void InitializeContent()
         {
             Assert.IsTrue(_itemPresenters.Count == 0 && _itemIdToIndex.Count == 0 && _itemRects.Count == 0, "Should be empty!");

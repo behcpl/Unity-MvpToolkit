@@ -159,6 +159,19 @@ namespace Behc.Mvp.Presenters
             return _layout.GetApproximatedContentSize(RectTransform.rect.size, model.Data.Count);
         }
 
+        public bool TryGetItemRect(object item, out Rect rect)
+        {
+            rect = default;
+            if (item == null)
+                return false;
+
+            if (!_itemIdToIndex.TryGetValue(item, out int value))
+                return false;
+
+            rect = _itemRects[value];
+            return true;
+        }
+
         private void UpdateContent()
         {
             //TODO: add fast path, when nothing changes?

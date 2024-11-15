@@ -10,37 +10,39 @@ namespace Behc.Mvp.Models
         private List<IDisposable> _disposeOnEnd;
         private CancellationTokenSource _cancellation;
 
+        public bool IsActive => _refCount > 0;
+
         public void Acquire()
         {
-            if (_refCount == 0)
+            int rc = _refCount;
+            _refCount++;
+
+            if (rc == 0)
             {
                 OnBegin();
             }
-
-            _refCount++;
         }
 
         public void Release()
         {
             _refCount--;
+            if (_refCount != 0)
+                return;
 
-            if (_refCount == 0)
+            if (_cancellation != null)
             {
-                if (_cancellation != null)
-                {
-                    _cancellation.Cancel();
-                    _cancellation.Dispose();
-                    _cancellation = null;
-                }
-                
-                OnEnd();
+                _cancellation.Cancel();
+                _cancellation.Dispose();
+                _cancellation = null;
+            }
 
-                if (_disposeOnEnd != null)
+            OnEnd();
+
+            if (_disposeOnEnd != null)
+            {
+                foreach (IDisposable disposable in _disposeOnEnd)
                 {
-                    foreach (IDisposable disposable in _disposeOnEnd)
-                    {
-                        disposable.Dispose();
-                    }
+                    disposable.Dispose();
                 }
             }
         }
@@ -52,7 +54,7 @@ namespace Behc.Mvp.Models
 
             return _cancellation.Token;
         }
-        
+
         // Automatically disposes an object when nothing is using this model anymore.
         protected void DisposeOnEnd(IDisposable disposable)
         {
@@ -60,11 +62,15 @@ namespace Behc.Mvp.Models
 
             _disposeOnEnd.Add(disposable);
         }
-        
+
         // Called when first presenter starts using this model. 
-        protected virtual void OnBegin() { }
+        protected virtual void OnBegin()
+        {
+        }
 
         // Called when last presenter stops using this model. 
-        protected virtual void OnEnd() { }
+        protected virtual void OnEnd()
+        {
+        }
     }
 }
