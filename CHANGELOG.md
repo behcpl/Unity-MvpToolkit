@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2024-11-15
+### Added
+- Introduce CancellationToken to navigation, models and presenters
+- Expose refresh method for data collections
+- Expose rect query for collection presenters
+### Bugfixes
+- Fix coupling on mouse that fails on touchscreen only devices
+- Fix missing lifetime events for sub-models
+- Fix broken variable size horizontal layout
+
 ## [0.11.1] - 2023-07-09
 ### Added
 - Complete missing features from MiniDiActivator
