@@ -24,7 +24,8 @@ namespace Behc.Mvp.Presenters.Layout
             Rect lastRect = index > 0 ? rects[index - 1] : new Rect(_layoutOptions.Padding.left, _layoutOptions.Padding.top, 0, _height - _layoutOptions.Padding.vertical);
 
             float gap = requestedGap >= 0 ? requestedGap : _layoutOptions.GapSize;
-            float size = requestedSize.y > 0 ? requestedSize.y : _layoutOptions.ElementSize;
+            if (index <= 0) gap = 0;
+            float size = requestedSize.x > 0 ? requestedSize.x : _layoutOptions.ElementSize;
 
             return new Rect(lastRect.xMax + gap, _layoutOptions.Padding.top, size, _height - _layoutOptions.Padding.vertical);
         }
