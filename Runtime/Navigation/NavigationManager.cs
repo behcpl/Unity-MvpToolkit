@@ -62,6 +62,30 @@ namespace Behc.Navigation
             ResetDeferredActions();
         }
 
+        public bool TryGetActiveNavigationPoint(out string name, out INavigable navigable)
+        {
+            if (_stack.Count > 0)
+            {
+                int lastIndex = _stack.Count - 1;
+                name = _stack[lastIndex].Name;
+                navigable = _stack[lastIndex].Navigable;
+                return true;
+            }
+            
+            name = null;
+            navigable = null;
+            return false;
+        }
+        
+        public IEnumerable<(string, INavigable)> GetNavigationPoints()
+        {
+            for (int index = _stack.Count - 1; index >= 0; index--)
+            {
+                NavigationPoint navPoint = _stack[index];
+                yield return (navPoint.Name, navPoint.Navigable);
+            }
+        }
+
         public void CommitDeferredChanges()
         {
             if (_continuation != null)
