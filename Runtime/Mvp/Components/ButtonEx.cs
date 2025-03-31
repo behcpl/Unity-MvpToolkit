@@ -51,12 +51,16 @@ namespace Behc.Mvp.Components
             }
         }
 
+        public float HoverDelay => _options.IsNull() ? 0.2f : _options.HoverDelay;
+        public float LongPressDuration => _options.IsNull() ? 0.5f : _options.LongPressDuration;
+
         public UnityEvent onClick = new UnityEvent();
         public UnityEvent onStateChange = new UnityEvent();
         public UnityEvent onHover = new UnityEvent();
         public UnityEvent onPointerEnter = new UnityEvent();
         public UnityEvent onPointerExit = new UnityEvent();
         public UnityEvent onLongPress = new UnityEvent();
+        public UnityEvent onLongPressCancel = new UnityEvent();
 
 #pragma warning disable CS0649
         [SerializeField] private ButtonOptions _options;
@@ -146,6 +150,7 @@ namespace Behc.Mvp.Components
                 {
                     StopCoroutine(_longPressCoroutine);
                     _longPressCoroutine = null;
+                    onLongPressCancel.Invoke();
                 }
 
                 Pressed = false;
@@ -218,22 +223,14 @@ namespace Behc.Mvp.Components
 
         private IEnumerator HoverWait()
         {
-            float delay = 0.2f;
-            if (_options.IsNotNull())
-                delay = _options.HoverDelay;
-
-            yield return new WaitForSecondsRealtime(delay); //TODO: cache
+            yield return new WaitForSecondsRealtime(HoverDelay); //TODO: cache
             onHover.Invoke();
             _hoverCoroutine = null;
         }
 
         private IEnumerator LongPressWait()
         {
-            float duration = 0.5f;
-            if (_options.IsNotNull())
-                duration = _options.LongPressDuration;
-
-            yield return new WaitForSecondsRealtime(duration); //TODO: cache
+            yield return new WaitForSecondsRealtime(LongPressDuration); //TODO: cache
             onLongPress.Invoke();
             _longPressCoroutine = null;
         }
@@ -250,6 +247,7 @@ namespace Behc.Mvp.Components
             {
                 StopCoroutine(_longPressCoroutine);
                 _longPressCoroutine = null;
+                onLongPressCancel.Invoke();
             }
         }
     }
