@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Behc.Mvp.Components;
 using Behc.Mvp.Models;
+using Behc.Mvp.Presenters.Factories;
 using Behc.Mvp.Presenters.Layout;
 using Behc.Utils;
 using UnityEngine;
@@ -13,7 +14,6 @@ namespace Behc.Mvp.Presenters
         private class ItemDesc
         {
             public object Model;
-            public Type ModelType;
             public IPresenter Presenter;
             public bool Active;
         }
@@ -23,7 +23,7 @@ namespace Behc.Mvp.Presenters
 
         [SerializeField] private float _safeMargin = 2.0f;
         [SerializeField] private float _fatMargin = 10.0f;
-        [SerializeField] private bool _shouldReuseObjects;
+        [SerializeField] private bool _itemPooling;
 #pragma warning restore CS0649
 
         private List<ItemDesc> _itemPresenters = new List<ItemDesc>();
@@ -37,6 +37,9 @@ namespace Behc.Mvp.Presenters
         private Func<object, Vector2> _evaluateSize;
         private Func<object, object, float> _evaluateGap;
 
+        private Dictionary<IPresenterFactory, Stack<IPresenter>> _presentersPool;
+        private Action<IPresenter> _despawnItemAction;
+
         private ViewRegion _viewRegion;
 
         private Rect _rect;
@@ -49,15 +52,12 @@ namespace Behc.Mvp.Presenters
 
         private const float _THRESHOLD = 1;
 
-        private readonly Dictionary<Type, Stack<IPresenter>> _presentersPool = new();
-        private Action<IPresenter> _presenterPoolAction;
-
         public override void Initialize(IPresenterMap presenterMap, PresenterUpdateKernel kernel)
         {
             base.Initialize(presenterMap, kernel);
 
             _layout = _layoutOptions.CreateLayout();
-            _presenterPoolAction = MovePooledPresenterOffscreen;
+            _despawnItemAction = MovePooledPresenterOffscreen;
         }
 
         public override void Bind(object model, IPresenter parent, bool prepareForAnimation)
@@ -86,8 +86,18 @@ namespace Behc.Mvp.Presenters
                     continue;
 
                 BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
-
                 PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
+            }
+
+            if (_presentersPool != null)
+            {
+                foreach (var kv in _presentersPool)
+                {
+                    foreach (IPresenter presenter in kv.Value)
+                    {
+                        kv.Key.DestroyPresenter(presenter);
+                    }
+                }
             }
 
             _itemPresenters.Clear();
@@ -178,10 +188,10 @@ namespace Behc.Mvp.Presenters
             return true;
         }
 
-        // Used for operations on presenter when they're pooled beacuse of _shouldResuseObjects flag
-        public void SetPresenterPoolAction(Action<IPresenter> presenterPoolAction)
+        // Used for operations on presenter when they're pooled
+        public void SetDespawnItem(Action<IPresenter> despawnItemAction)
         {
-            _presenterPoolAction = presenterPoolAction;
+            _despawnItemAction = despawnItemAction;
         }
 
         private void UpdateContent()
@@ -225,7 +235,7 @@ namespace Behc.Mvp.Presenters
                 }
                 else
                 {
-                    itemDesc = new ItemDesc { Model = item, ModelType = item.GetType() };
+                    itemDesc = new ItemDesc { Model = item };
                 }
 
                 _itemPresenters.Add(itemDesc);
@@ -250,7 +260,8 @@ namespace Behc.Mvp.Presenters
                 if (remove.Active)
                     remove.Presenter.Deactivate();
 
-                ClearItemDesc(remove);
+                BindingHelper.Unbind(remove.Model, remove.Presenter);
+                DespawnPresenter(remove.Model, remove.Presenter);
             }
 
             if (_itemRects.Count > 0)
@@ -261,33 +272,11 @@ namespace Behc.Mvp.Presenters
             }
         }
 
-        private void ClearItemDesc(ItemDesc itemDesc)
-        {
-            BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
-
-            if (_shouldReuseObjects)
-            {
-                _presenterPoolAction?.Invoke(itemDesc.Presenter);
-
-                if (_presentersPool.ContainsKey(itemDesc.ModelType) == false)
-                {
-                    _presentersPool[itemDesc.ModelType] = new Stack<IPresenter>();
-                }
-
-                _presentersPool[itemDesc.ModelType].Push(itemDesc.Presenter);
-            }
-            else
-            {
-                PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
-            }
-
-            itemDesc.Presenter = null;
-        }
-
         private static void MovePooledPresenterOffscreen(IPresenter pooledPresenter)
         {
             Rect presenterRect = pooledPresenter.RectTransform.rect;
-            pooledPresenter.RectTransform.anchoredPosition = new Vector3(-presenterRect.width, presenterRect.height, 0);
+            pooledPresenter.RectTransform.anchoredPosition =
+                new Vector3(-presenterRect.width * 2, presenterRect.height * 2, 0);
         }
 
         private void UpdateLayout()
@@ -314,7 +303,8 @@ namespace Behc.Mvp.Presenters
 
                 if (itemDesc.Presenter != null)
                 {
-                    SetInsetAndSize(itemDesc.Presenter.RectTransform, itemRect.position.x, itemRect.position.y, itemRect.width, itemRect.height);
+                    SetInsetAndSize(itemDesc.Presenter.RectTransform, itemRect.position.x, itemRect.position.y,
+                        itemRect.width, itemRect.height);
                 }
             }
 
@@ -347,15 +337,9 @@ namespace Behc.Mvp.Presenters
                 if ((neverVisible || !_clipRect.Overlaps(itemRect)) && !alwaysVisible)
                     return;
 
-                if (_shouldReuseObjects == false ||
-                    _presentersPool.TryGetValue(itemDesc.ModelType, out Stack<IPresenter> presenters) == false ||
-                    presenters.TryPop(out itemDesc.Presenter) == false)
-                {
-                    itemDesc.Presenter = PresenterMap.CreatePresenter(itemDesc.Model, RectTransform);
-                    itemDesc.Presenter.SetUnbindPolicies(UnbindPolicies.None);
-                }
-
-                SetInsetAndSize(itemDesc.Presenter.RectTransform, itemRect.position.x, itemRect.position.y, itemRect.width, itemRect.height);
+                itemDesc.Presenter = SpawnPresenter(itemDesc.Model);
+                SetInsetAndSize(itemDesc.Presenter.RectTransform, itemRect.position.x, itemRect.position.y,
+                    itemRect.width, itemRect.height);
                 BindingHelper.Bind(itemDesc.Model, itemDesc.Presenter, this, false);
                 if (IsActive)
                 {
@@ -380,8 +364,52 @@ namespace Behc.Mvp.Presenters
                     itemDesc.Active = false;
                 }
 
-                ClearItemDesc(itemDesc);
+                BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
+                DespawnPresenter(itemDesc.Model, itemDesc.Presenter);
+                itemDesc.Presenter = null;
             }
+        }
+
+        private IPresenter SpawnPresenter(object model)
+        {
+            if (!_itemPooling)
+                return PresenterMap.CreatePresenter(model, RectTransform);
+
+            IPresenterFactory factory = PresenterMap.TryGetPresenterFactory(model);
+            if (factory == null)
+                throw new Exception($"No PresenterFactory found for '{model.GetType().Name}' model!");
+
+            IPresenter presenter = null;
+            _presentersPool ??= new Dictionary<IPresenterFactory, Stack<IPresenter>>();
+            if (_presentersPool.TryGetValue(factory, out Stack<IPresenter> pool) && pool.Count > 0)
+            {
+                presenter = pool.Pop();
+            }
+
+            presenter ??= factory.CreatePresenter(RectTransform);
+            presenter.SetUnbindPolicy(UnbindPolicy.KEEP_UNCHANGED);
+            return presenter;
+        }
+
+        private void DespawnPresenter(object model, IPresenter presenter)
+        {
+            if (!_itemPooling)
+            {
+                PresenterMap.DestroyPresenter(model, presenter);
+                return;
+            }
+
+            _presentersPool ??= new Dictionary<IPresenterFactory, Stack<IPresenter>>();
+            IPresenterFactory factory = PresenterMap.TryGetPresenterFactory(model);
+
+            if (!_presentersPool.TryGetValue(factory, out Stack<IPresenter> pool))
+            {
+                pool = new Stack<IPresenter>();
+                _presentersPool.Add(factory, pool);
+            }
+
+            pool.Push(presenter);
+            _despawnItemAction.Invoke(presenter);
         }
 
         private void Update()
@@ -434,8 +462,10 @@ namespace Behc.Mvp.Presenters
                 tbr.x + rect.width * pivot.x + _safeMargin,
                 -ttl.y + rect.height * (1.0f - pivot.y) + _safeMargin);
 
-            if (Math.Abs(newClipRect.xMin - _clipRect.xMin) < _THRESHOLD && Math.Abs(newClipRect.yMin - _clipRect.yMin) < _THRESHOLD &&
-                Math.Abs(newClipRect.xMax - _clipRect.xMax) < _THRESHOLD && Math.Abs(newClipRect.yMax - _clipRect.yMax) < _THRESHOLD)
+            if (Math.Abs(newClipRect.xMin - _clipRect.xMin) < _THRESHOLD &&
+                Math.Abs(newClipRect.yMin - _clipRect.yMin) < _THRESHOLD &&
+                Math.Abs(newClipRect.xMax - _clipRect.xMax) < _THRESHOLD &&
+                Math.Abs(newClipRect.yMax - _clipRect.yMax) < _THRESHOLD)
             {
                 changed = false;
                 return;
@@ -460,7 +490,8 @@ namespace Behc.Mvp.Presenters
             gap = _evaluateGap?.Invoke(item, lastItem) ?? -1;
         }
 
-        private static void SetInsetAndSize(RectTransform rt, float offsetLeft, float offsetTop, float width, float height)
+        private static void SetInsetAndSize(RectTransform rt, float offsetLeft, float offsetTop, float width,
+            float height)
         {
             Vector2 pivot = rt.pivot;
 
@@ -495,8 +526,10 @@ namespace Behc.Mvp.Presenters
             Rect parentRect = rt.rect;
             Vector2 parentPivot = rt.pivot;
 
-            Vector3 lMin = new Vector3(rect.xMin - parentRect.width * parentPivot.x, -rect.yMin + parentRect.height * (1.0f - parentPivot.y), 0);
-            Vector3 lMax = new Vector3(rect.xMax - parentRect.width * parentPivot.x, -rect.yMax + parentRect.height * (1.0f - parentPivot.y), 0);
+            Vector3 lMin = new Vector3(rect.xMin - parentRect.width * parentPivot.x,
+                -rect.yMin + parentRect.height * (1.0f - parentPivot.y), 0);
+            Vector3 lMax = new Vector3(rect.xMax - parentRect.width * parentPivot.x,
+                -rect.yMax + parentRect.height * (1.0f - parentPivot.y), 0);
 
             Vector3 wMin = rt.TransformPoint(lMin);
             Vector3 wMax = rt.TransformPoint(lMax);

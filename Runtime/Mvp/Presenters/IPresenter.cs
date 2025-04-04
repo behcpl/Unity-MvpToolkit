@@ -49,7 +49,6 @@ namespace Behc.Mvp.Presenters
 
         // Called only from outside on demand
         // Steers the policy for what happens to the gameObject on unbind
-        // Important: This is a Flags enum, so you can store multiple policies here
-        void SetUnbindPolicies(UnbindPolicies unbindPolicies);
+        void SetUnbindPolicy(UnbindPolicy unbindPolicy);
     }
 }

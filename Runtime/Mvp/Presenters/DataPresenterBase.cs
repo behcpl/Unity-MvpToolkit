@@ -28,7 +28,7 @@ namespace Behc.Mvp.Presenters
         private IPresenterMap _presenterMap;
         private SmallSet _blockers;
         private bool _activeSelf;
-        private UnbindPolicies _unbindPolicies = UnbindPolicies.DeactivateGameObject;
+        private UnbindPolicy _unbindPolicy = UnbindPolicy.DEACTIVATE_GAME_OBJECT;
 
         public virtual void Initialize(IPresenterMap presenterMap, PresenterUpdateKernel kernel)
         {
@@ -76,7 +76,7 @@ namespace Behc.Mvp.Presenters
             if (IsAnimating)
                 AbortAnimations();
 
-            if (_unbindPolicies.HasFlag(UnbindPolicies.DeactivateGameObject))
+            if (_unbindPolicy == UnbindPolicy.DEACTIVATE_GAME_OBJECT)
             {
                 gameObject.SetActive(false);
             }
@@ -136,9 +136,9 @@ namespace Behc.Mvp.Presenters
             _scheduledUpdate = false;
         }
 
-        public void SetUnbindPolicies(UnbindPolicies unbindPolicies)
+        public void SetUnbindPolicy(UnbindPolicy unbindPolicy)
         {
-            _unbindPolicies = unbindPolicies;
+            _unbindPolicy = unbindPolicy;
         }
 
         public void SetBlockedStatus(bool blocked, object source)
