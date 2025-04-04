@@ -98,6 +98,8 @@ namespace Behc.Mvp.Presenters
                         kv.Key.DestroyPresenter(presenter);
                     }
                 }
+                
+                _presentersPool.Clear();
             }
 
             _itemPresenters.Clear();

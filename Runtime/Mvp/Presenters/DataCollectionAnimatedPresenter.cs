@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Behc.Mvp.Components;
 using Behc.Mvp.Models;
+using Behc.Mvp.Presenters.Factories;
 using Behc.Mvp.Presenters.Layout;
 using Behc.Utils;
 using UnityEngine;
@@ -73,6 +74,7 @@ namespace Behc.Mvp.Presenters
 
         [SerializeField] private float _safeMargin = 2.0f;
         [SerializeField] private float _fatMargin = 10.0f;
+        [SerializeField] private bool _itemPooling;
 
         [SerializeField] private bool _animateItemsOnShow;
         [SerializeField] private bool _animateItemsOnHide;
@@ -82,6 +84,9 @@ namespace Behc.Mvp.Presenters
         private readonly List<ItemDesc> _removedItems = new List<ItemDesc>();
         private Dictionary<object, int> _itemIdToIndex = new Dictionary<object, int>();
         private List<Rect> _itemRects = new List<Rect>();
+   
+        private Dictionary<IPresenterFactory, Stack<IPresenter>> _presentersPool;
+        private Action<IPresenter> _despawnItemAction;
 
         private ICollectionLayout _layout;
 
@@ -110,6 +115,7 @@ namespace Behc.Mvp.Presenters
             base.Initialize(presenterMap, kernel);
 
             _layout = _layoutOptions.CreateLayout();
+            _despawnItemAction = MovePooledPresenterOffscreen;
         }
 
         public override void Bind(object model, IPresenter parent, bool prepareForAnimation)
@@ -165,6 +171,19 @@ namespace Behc.Mvp.Presenters
 
             _viewRegion = null;
 
+            if (_presentersPool != null)
+            {
+                foreach (var kv in _presentersPool)
+                {
+                    foreach (IPresenter presenter in kv.Value)
+                    {
+                        kv.Key.DestroyPresenter(presenter);
+                    }
+                }
+
+                _presentersPool.Clear();
+            }
+            
             base.Unbind();
         }
 
@@ -289,7 +308,13 @@ namespace Behc.Mvp.Presenters
             showComplete?.Invoke();
             hideCompleted?.Invoke();
         }
-
+        
+        // Used for operations on presenter when they're pooled
+        public void SetDespawnItem(Action<IPresenter> despawnItemAction)
+        {
+            _despawnItemAction = despawnItemAction;
+        }
+        
         protected override void OnActivate()
         {
             foreach (ItemDesc item in _itemPresenters)
@@ -632,7 +657,14 @@ namespace Behc.Mvp.Presenters
                 RectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, newSize.y);
             }
         }
-
+        
+        private static void MovePooledPresenterOffscreen(IPresenter pooledPresenter)
+        {
+            Rect presenterRect = pooledPresenter.RectTransform.rect;
+            pooledPresenter.RectTransform.anchoredPosition =
+                new Vector3(-presenterRect.width * 2, presenterRect.height * 2, 0);
+        }
+        
         private void UpdateLayout()
         {
             bool alwaysVisible = _viewRegion.IsNull();
@@ -757,7 +789,7 @@ namespace Behc.Mvp.Presenters
                 if (itemDesc.Presenter != null)
                 {
                     BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
-                    PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
+                    DespawnPresenter(itemDesc.Model, itemDesc.Presenter);
                 }
 
                 _removedItems[i - 1] = _removedItems[_removedItems.Count - 1];
@@ -775,7 +807,7 @@ namespace Behc.Mvp.Presenters
                 if (itemDesc.AnimatingShow && itemDesc.Timer < itemDesc.Delay)
                     return;
 
-                itemDesc.Presenter = PresenterMap.CreatePresenter(itemDesc.Model, RectTransform);
+                itemDesc.Presenter = SpawnPresenter(itemDesc.Model);
                 SetInsetAndSize(itemDesc.Presenter.RectTransform, itemRect.position.x, itemRect.position.y, itemRect.width, itemRect.height);
 
                 BindingHelper.Bind(itemDesc.Model, itemDesc.Presenter, this, itemDesc.AnimatingShow || itemDesc.AnimatingHide);
@@ -827,13 +859,54 @@ namespace Behc.Mvp.Presenters
                 }
 
                 BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
-
-                PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
+                DespawnPresenter(itemDesc.Model, itemDesc.Presenter);
 
                 itemDesc.Presenter = null;
             }
         }
+        
+        private IPresenter SpawnPresenter(object model)
+        {
+            if (!_itemPooling)
+                return PresenterMap.CreatePresenter(model, RectTransform);
 
+            IPresenterFactory factory = PresenterMap.TryGetPresenterFactory(model);
+            if (factory == null)
+                throw new Exception($"No PresenterFactory found for '{model.GetType().Name}' model!");
+
+            IPresenter presenter = null;
+            _presentersPool ??= new Dictionary<IPresenterFactory, Stack<IPresenter>>();
+            if (_presentersPool.TryGetValue(factory, out Stack<IPresenter> pool) && pool.Count > 0)
+            {
+                presenter = pool.Pop();
+            }
+
+            presenter ??= factory.CreatePresenter(RectTransform);
+            presenter.SetUnbindPolicy(UnbindPolicy.KEEP_UNCHANGED);
+            return presenter;
+        }
+
+        private void DespawnPresenter(object model, IPresenter presenter)
+        {
+            if (!_itemPooling)
+            {
+                PresenterMap.DestroyPresenter(model, presenter);
+                return;
+            }
+
+            _presentersPool ??= new Dictionary<IPresenterFactory, Stack<IPresenter>>();
+            IPresenterFactory factory = PresenterMap.TryGetPresenterFactory(model);
+
+            if (!_presentersPool.TryGetValue(factory, out Stack<IPresenter> pool))
+            {
+                pool = new Stack<IPresenter>();
+                _presentersPool.Add(factory, pool);
+            }
+
+            pool.Push(presenter);
+            _despawnItemAction.Invoke(presenter);
+        }
+        
         private void Update()
         {
             // OnRectTransformDimensionsChange() is not enough here, for aggressive optimizations you need to check
