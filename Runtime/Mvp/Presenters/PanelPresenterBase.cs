@@ -27,6 +27,7 @@ namespace Behc.Mvp.Presenters
         private IPresenterMap _presenterMap;
         private CancellationTokenSource _cancelOnDeactivate;
         private CancellationTokenSource _cancelOnUnbind;
+        private UnbindPolicies _unbindPolicies = UnbindPolicies.DeactivateGameObject;
 
         public RectTransform RectTransform => (RectTransform)transform;
         public IPresenterMap PresenterMap => _presenterMap;
@@ -94,7 +95,10 @@ namespace Behc.Mvp.Presenters
             _cancelOnUnbind?.Dispose();
             _cancelOnUnbind = null;
 
-            gameObject.SetActive(false); //TODO: this is optimization, check if some operations requires object to be still active
+            if (_unbindPolicies.HasFlag(UnbindPolicies.DeactivateGameObject))
+            {
+                gameObject.SetActive(false); //TODO: this is optimization, check if some operations requires object to be still active
+            }
 
             foreach (PresenterField field in _presenters)
             {
@@ -196,6 +200,11 @@ namespace Behc.Mvp.Presenters
 #if BEHC_MVPTOOLKIT_VERBOSE
             Debug.Log($"({name}) ScheduledUpdate <<{PresenterUpdateKernel.Counter}>>");
 #endif
+        }
+
+        public void SetUnbindPolicies(UnbindPolicies unbindPolicies)
+        {
+            _unbindPolicies = unbindPolicies;
         }
 
         // Automatically disposes an object when presenter is no longer active.

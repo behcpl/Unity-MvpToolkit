@@ -13,6 +13,7 @@ namespace Behc.Mvp.Presenters
         private class ItemDesc
         {
             public object Model;
+            public Type ModelType;
             public IPresenter Presenter;
             public bool Active;
         }
@@ -22,6 +23,7 @@ namespace Behc.Mvp.Presenters
 
         [SerializeField] private float _safeMargin = 2.0f;
         [SerializeField] private float _fatMargin = 10.0f;
+        [SerializeField] private bool _shouldReuseObjects;
 #pragma warning restore CS0649
 
         private List<ItemDesc> _itemPresenters = new List<ItemDesc>();
@@ -47,11 +49,15 @@ namespace Behc.Mvp.Presenters
 
         private const float _THRESHOLD = 1;
 
+        private readonly Dictionary<Type, Stack<IPresenter>> _presentersPool = new();
+        private Action<IPresenter> _presenterPoolAction;
+
         public override void Initialize(IPresenterMap presenterMap, PresenterUpdateKernel kernel)
         {
             base.Initialize(presenterMap, kernel);
 
             _layout = _layoutOptions.CreateLayout();
+            _presenterPoolAction = MovePooledPresenterOffscreen;
         }
 
         public override void Bind(object model, IPresenter parent, bool prepareForAnimation)
@@ -172,6 +178,12 @@ namespace Behc.Mvp.Presenters
             return true;
         }
 
+        // Used for operations on presenter when they're pooled beacuse of _shouldResuseObjects flag
+        public void SetPresenterPoolAction(Action<IPresenter> presenterPoolAction)
+        {
+            _presenterPoolAction = presenterPoolAction;
+        }
+
         private void UpdateContent()
         {
             //TODO: add fast path, when nothing changes?
@@ -213,7 +225,7 @@ namespace Behc.Mvp.Presenters
                 }
                 else
                 {
-                    itemDesc = new ItemDesc { Model = item };
+                    itemDesc = new ItemDesc { Model = item, ModelType = item.GetType() };
                 }
 
                 _itemPresenters.Add(itemDesc);
@@ -238,8 +250,7 @@ namespace Behc.Mvp.Presenters
                 if (remove.Active)
                     remove.Presenter.Deactivate();
 
-                BindingHelper.Unbind(remove.Model, remove.Presenter);
-                PresenterMap.DestroyPresenter(remove.Model, remove.Presenter);
+                ClearItemDesc(remove);
             }
 
             if (_itemRects.Count > 0)
@@ -248,6 +259,35 @@ namespace Behc.Mvp.Presenters
                 RectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, newSize.x);
                 RectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, newSize.y);
             }
+        }
+
+        private void ClearItemDesc(ItemDesc itemDesc)
+        {
+            BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
+
+            if (_shouldReuseObjects)
+            {
+                _presenterPoolAction?.Invoke(itemDesc.Presenter);
+
+                if (_presentersPool.ContainsKey(itemDesc.ModelType) == false)
+                {
+                    _presentersPool[itemDesc.ModelType] = new Stack<IPresenter>();
+                }
+
+                _presentersPool[itemDesc.ModelType].Push(itemDesc.Presenter);
+            }
+            else
+            {
+                PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
+            }
+
+            itemDesc.Presenter = null;
+        }
+
+        private static void MovePooledPresenterOffscreen(IPresenter pooledPresenter)
+        {
+            Rect presenterRect = pooledPresenter.RectTransform.rect;
+            pooledPresenter.RectTransform.anchoredPosition = new Vector3(-presenterRect.width, presenterRect.height, 0);
         }
 
         private void UpdateLayout()
@@ -306,7 +346,15 @@ namespace Behc.Mvp.Presenters
             {
                 if ((neverVisible || !_clipRect.Overlaps(itemRect)) && !alwaysVisible)
                     return;
-                itemDesc.Presenter = PresenterMap.CreatePresenter(itemDesc.Model, RectTransform);
+
+                if (_shouldReuseObjects == false ||
+                    _presentersPool.TryGetValue(itemDesc.ModelType, out Stack<IPresenter> presenters) == false ||
+                    presenters.TryPop(out itemDesc.Presenter) == false)
+                {
+                    itemDesc.Presenter = PresenterMap.CreatePresenter(itemDesc.Model, RectTransform);
+                    itemDesc.Presenter.SetUnbindPolicies(UnbindPolicies.None);
+                }
+
                 SetInsetAndSize(itemDesc.Presenter.RectTransform, itemRect.position.x, itemRect.position.y, itemRect.width, itemRect.height);
                 BindingHelper.Bind(itemDesc.Model, itemDesc.Presenter, this, false);
                 if (IsActive)
@@ -332,11 +380,7 @@ namespace Behc.Mvp.Presenters
                     itemDesc.Active = false;
                 }
 
-                BindingHelper.Unbind(itemDesc.Model, itemDesc.Presenter);
-
-                PresenterMap.DestroyPresenter(itemDesc.Model, itemDesc.Presenter);
-
-                itemDesc.Presenter = null;
+                ClearItemDesc(itemDesc);
             }
         }
 

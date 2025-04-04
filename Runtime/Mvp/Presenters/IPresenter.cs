@@ -46,5 +46,10 @@ namespace Behc.Mvp.Presenters
         // Request this update using PresenterUpdateKernel.RequestUpdate(this)
         // Important: Some methods (like Bind/Unbind) can only be called during this update
         void ScheduledUpdate();
+
+        // Called only from outside on demand
+        // Steers the policy for what happens to the gameObject on unbind
+        // Important: This is a Flags enum, so you can store multiple policies here
+        void SetUnbindPolicies(UnbindPolicies unbindPolicies);
     }
 }
