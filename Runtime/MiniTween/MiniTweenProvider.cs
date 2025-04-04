@@ -8,6 +8,7 @@ namespace Behc.MiniTween
     public class MiniTweenProvider : AbstractProvider<ITweenSystem>
     {
         public bool UnscaledTime;
+        public bool DisablePooling;
 
         [NonSerialized] private MiniTweenKernel _kernel;
 

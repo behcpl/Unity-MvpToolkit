@@ -7,7 +7,9 @@ namespace Behc.MiniTween
     public class MiniTweenKernel : MonoBehaviour, ITweenSystem
     {
         private const int _INIT_SIZE = 16;
-        private MiniTweenProvider _options;
+
+        private bool _unscaledTime;
+        private bool _disablePooling;
 
         private class Tween : ITween
         {
@@ -23,7 +25,7 @@ namespace Behc.MiniTween
             public Action OnUpdate;
             public Action OnComplete;
             public Action<object, Vector4> Setter;
-            
+
             public AnimationCurve Curve;
             public Func<Tween, float, float> EaseFunc = EaseNone;
 
@@ -36,7 +38,7 @@ namespace Behc.MiniTween
             {
                 if (Completed)
                     return;
-                
+
                 Setter(Owner, ValueTo);
                 OnUpdate?.Invoke();
 
@@ -85,11 +87,15 @@ namespace Behc.MiniTween
 
         public void Initialize(MiniTweenProvider options)
         {
-            _options = options;
+            _unscaledTime = options.UnscaledTime;
+            _disablePooling = options.DisablePooling;
 
-            for (int i = 0; i < _INIT_SIZE; i++)
+            if (!_disablePooling)
             {
-                _unusedPool.Add(AllocateNew());
+                for (int i = 0; i < _INIT_SIZE; i++)
+                {
+                    _unusedPool.Add(AllocateNew());
+                }
             }
         }
 
@@ -112,17 +118,18 @@ namespace Behc.MiniTween
 
         private void Update()
         {
-            float dt = _options.UnscaledTime ? Time.unscaledDeltaTime : Time.smoothDeltaTime;
+            float dt = _unscaledTime ? Time.unscaledDeltaTime : Time.smoothDeltaTime;
 
             foreach (Tween newTween in _newTweens)
             {
-                if(newTween.Completed)
+                if (newTween.Completed)
                     Deallocate(newTween);
                 else
                     _activeTweens.Add(newTween);
             }
+
             _newTweens.Clear();
-            
+
             foreach (Tween tween in _activeTweens)
             {
                 if (tween.Completed)
@@ -153,6 +160,9 @@ namespace Behc.MiniTween
 
         private Tween Allocate()
         {
+            if (_disablePooling)
+                return AllocateNew();
+            
             if (_unusedPool.Count > 0)
             {
                 Tween item = _unusedPool[_unusedPool.Count - 1];
@@ -166,6 +176,9 @@ namespace Behc.MiniTween
 
         private void Deallocate(Tween item)
         {
+            if (_disablePooling)
+                return;
+            
             item.Id = null;
             item.OnComplete = null;
             item.OnUpdate = null;
