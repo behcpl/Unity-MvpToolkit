@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2025-04-07
+### Added
+- Local item pooling for collection presenters
+- ButtonEx long-press cancel event
+- Option to disable pooling for MiniTween
+### Known issues
+- MiniTween do not guard against dead tween access
+
 ## [0.13.0] - 2025-03-06
 ### Added
 - Expose navigation stack for inspection
