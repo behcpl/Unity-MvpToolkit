@@ -94,7 +94,10 @@ namespace Behc.Mvp.Presenters
 				}
 			}
 
-			_clickToCloseInfo?.SetActive(_model.CanDefaultClose());
+			if (_clickToCloseInfo != null)
+			{
+				_clickToCloseInfo.SetActive(_model.CanDefaultClose());
+			}
 		}
 
 		private void CurtainClicked()
