@@ -6,6 +6,7 @@ namespace Behc.Mvp.Presenters
 {
     public class DataStackPresenter : AnimatedPresenterBase<DataStack>
     {
+        // TODO: migrate to Curtain or create generic event for presenter changes
         [SerializeField] protected GameObject _clickToCloseInfo;
 
         public override void Bind(object model, IPresenter parent, bool prepareForAnimation)
