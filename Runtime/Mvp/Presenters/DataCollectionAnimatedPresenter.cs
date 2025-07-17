@@ -417,16 +417,29 @@ namespace Behc.Mvp.Presenters
             return _layout.GetApproximatedContentSize(RectTransform.rect.size, model.Data.Count);
         }
 
+        public bool TryGetItemPresenter(object item, out IPresenter itemPresenter)
+        {
+            itemPresenter = default;
+            if (item == null)
+                return false;
+
+            if (!_itemIdToIndex.TryGetValue(item, out int index))
+                return false;
+
+            itemPresenter = _itemPresenters[index].Presenter;
+            return true;
+        }
+        
         public bool TryGetItemRect(object item, out Rect rect)
         {
             rect = default;
             if (item == null)
                 return false;
 
-            if (!_itemIdToIndex.TryGetValue(item, out int value))
+            if (!_itemIdToIndex.TryGetValue(item, out int index))
                 return false;
 
-            rect = _itemRects[value];
+            rect = _itemRects[index];
             return true;
         }
         
