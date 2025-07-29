@@ -63,6 +63,24 @@ namespace Behc.Mvp.Presenters
             }
         }
 
+        public bool TryGetItemPresenter(object item, out IPresenter itemPresenter)
+        {
+            itemPresenter = default;
+            if (item == null)
+                return false;
+
+            foreach (ItemDesc itemDescription in _itemPresenters)
+            {
+                if (itemDescription.Model == item)
+                {
+                    itemPresenter = itemDescription.Presenter;
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
         protected override void OnScheduledUpdate()
         {
             if (_contentChanged)
